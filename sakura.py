@@ -271,11 +271,29 @@ def plugin_remote_install(path):
     plugin_install(path)
 
 
+def zip_file_index(zip_file):
+    is_sys_dir = lambda x: x.count('/') == 1 and x[-1] == '/'
+    return [x for x in zip_file.namelist() if not is_sys_dir(x)]
+
+
+def plugin_check(path):
+    """Used to check a plugin before installing."""
+
+    zip_file = ZipFile(path, 'r')
+    zip_index = zip_file_index(zip_file)
+    zip_file.close()
+
+    for path in zip_file_index(zip_file):
+        print path
+
+    return None
+
+
 def plugin_install(path):
     """Plugin zip-extraction protocol."""
 
     zip_file = ZipFile(path, 'r')
-    zip_index = zip_file.namelist()
+    zip_index = zip_file_index(zip_file)
     zip_file_name = path.rsplit('/', 1)[-1].replace('.zip', '')
 
     # create a temporary directory to work in
@@ -295,11 +313,6 @@ def plugin_install(path):
     sql = 'INSERT OR REPLACE INTO plugin_files (path, plugin) VALUES (?, ?)'
 
     for path in zip_index:
-
-        # ignore pre-existing folders
-        if path.count('/') == 1 and path[-1] == '/':
-            continue
-
         zip_file.extract(path)
         cursor.execute(sql, (path, zip_file_name))
         conn.commit()  # in case install fails!
@@ -415,6 +428,13 @@ parser.add_argument(
                     help=info_help
                    )
 
+# plugin check
+check_help = 'Check a plugin before you install it!'
+parser.add_argument(
+                    '--check',
+                    help=check_help
+                   )
+
 # plugin remove
 delete_help = 'Delete a plugin (by name)'
 parser.add_argument(
@@ -451,6 +471,8 @@ elif args.info:
     plugin_info(args.info)
 elif args.delete:
     plugin_delete(args.delete)
+elif args.check:
+    plugin_check(args.check)
 elif args.refresh:
     cache()
 elif args.httpd:
