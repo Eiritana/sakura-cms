@@ -15,6 +15,8 @@ from glob import glob
 import SocketServer
 import BaseHTTPServer
 import CGIHTTPServer
+from zipfile import ZipFile
+import sqlite3
 
 
 # CONFIG AND CONSTANTS ########################################################
@@ -89,27 +91,28 @@ def calls_piece(document, piece_directory):
     return document
 
 
-def parse_plugins(public):
-    package = 'plugins'
-    plugins = {}
+def load_parsers(public):
+    package = 'parsers'
+    parsers = {}
 
-    for file_name in glob('plugins/*.py'):
+    for file_name in glob(package + '/*.py'):
         module_name = file_name.split('/', 1)[1].replace('.py', '')
 
         if module_name == "__init__":
             continue
 
         # setup the plugin entry
-        plugin_config = __import__("plugins.%s" % (module_name), fromlist=["CONFIG"])
-        plugin_config = plugin_config.CONFIG
-        replaces = plugin_config['replaces']
-        args = [public[arg] for arg in plugin_config['args']]
-        calls = plugin_config['calls']
-        func = __import__("plugins.%s" % (module_name), fromlist=[calls])
+        parser_path = "%s.%s" % (package, module_name)
+        parser_config = __import__(parser_path, fromlist=["CONFIG"])
+        parser_config = parser_config.CONFIG
+        replaces = parser_config['replaces']
+        args = [public[arg] for arg in parser_config['args']]
+        calls = parser_config['calls']
+        func = __import__(parser_path, fromlist=[calls])
         func = getattr(func, calls)
-        plugins[replaces] = (func, args)
+        parsers[replaces] = (func, args)
 
-    return plugins
+    return parsers
 
 
 def parse(document_path):
@@ -149,7 +152,7 @@ def parse(document_path):
                   'element_full': element['full'],
                   'element_name': element['name'],
                  }
-        func, args = parse_plugins(public)[element['name']]
+        func, args = load_parsers(public)[element['name']]
 
         # if we do have user defined arguments in the element,
         # then append them to the args!
@@ -263,6 +266,107 @@ def httpd():
         print "Finished"
 
 
+def plugin_remote_install(path):
+    # get file, put locally, set path
+    plugin_install(path)
+
+
+def plugin_install(path):
+    """Plugin zip-extraction protocol."""
+
+    zip_file = ZipFile(path, 'r')
+    zip_index = zip_file.namelist()
+    zip_file_name = path.rsplit('/', 1)[-1].replace('.zip', '')
+
+    # create a temporary directory to work in
+    # os.makedir('tmp')
+
+    # setup database connection
+    conn = sqlite3.connect('sakura.db')
+    cursor = conn.cursor()
+    sql = '''\
+          CREATE TABLE IF NOT EXISTS plugin_files
+          (
+           path TEXT UNIQUE,
+           plugin TEXT
+          )
+          '''
+    cursor.execute(sql)
+    sql = 'INSERT OR REPLACE INTO plugin_files (path, plugin) VALUES (?, ?)'
+
+    for path in zip_index:
+
+        # ignore pre-existing folders
+        if path.count('/') == 1 and path[-1] == '/':
+            continue
+
+        zip_file.extract(path)
+        cursor.execute(sql, (path, zip_file_name))
+        conn.commit()  # in case install fails!
+
+    zip_file.close()
+    conn.close()
+
+
+def plugin_delete(name):
+    """Delete file paths associated with plugin."""
+
+    conn = sqlite3.connect('sakura.db')
+    cursor = conn.cursor()
+    sql = 'SELECT path FROM plugin_files WHERE plugin=?'
+    cursor.execute(sql, (name,))
+    paths = cursor.fetchall()
+    conn.close()
+
+    if not paths:
+        plugin_error(name)
+
+    # delete paths
+    for path in paths:
+
+        try:
+            os.remove(path[0])
+        except OSError:
+            continue
+
+    conn = sqlite3.connect('sakura.db')
+    cursor = conn.cursor()
+    sql = 'DELETE FROM plugin_files WHERE plugin=?'
+    cursor.execute(sql, (name,))
+    conn.commit()
+    conn.close()
+
+
+def plugin_list():
+    pass
+
+
+def plugin_error(plugin):
+    print 'no such plugin "%s" installed' % plugin
+    sys.exit(1)
+
+
+def plugin_info(plugin):
+    """Display files installed by "plugin."
+    
+    """
+
+    conn = sqlite3.connect('sakura.db')
+    cursor = conn.cursor()
+    sql = 'SELECT path FROM plugin_files WHERE plugin=?'
+    cursor.execute(sql, (plugin,))
+    file_paths = cursor.fetchall()
+    conn.close()
+
+    if not file_paths:
+        plugin_error(plugin)
+
+    # return file_paths
+
+    for file_path in file_paths:
+        print file_path[0]
+
+
 # COMMAND LINE USAGE ##########################################################
 
 
@@ -297,6 +401,36 @@ parser.add_argument(
                     action='store_true'
                    )
 
+# plugin install
+install_help = 'Install a plugin (.zip)'
+parser.add_argument(
+                    '--install',
+                    help=install_help,
+                   )
+
+# plugin info
+info_help = 'Display files belonging to a plugin.'
+parser.add_argument(
+                    '--info',
+                    help=info_help
+                   )
+
+# plugin remove
+delete_help = 'Delete a plugin (by name)'
+parser.add_argument(
+                    '--delete',
+                    help=delete_help,
+                   )
+
+# plugin list
+list_help = 'List installed plugins'
+parser.add_argument(
+                    '--list',
+                    help=list_help,
+                    dest='list',
+                    action='store_true'
+                   )
+
 # backup
 backup_help = 'Backup defined Sakura directories.'
 parser.add_argument(
@@ -311,6 +445,12 @@ args = parser.parse_args()
 
 if args.setup:
     setup()
+elif args.install:
+    plugin_install(args.install)
+elif args.info:
+    plugin_info(args.info)
+elif args.delete:
+    plugin_delete(args.delete)
 elif args.refresh:
     cache()
 elif args.httpd:
