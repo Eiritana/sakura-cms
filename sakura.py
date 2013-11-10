@@ -285,6 +285,33 @@ def zip_file_index(zip_file):
     return [x for x in zip_file.namelist() if not is_sys_dir(x)]
 
 
+def sanity_check(path):
+    """Assure zip contents adhere to file structure standard.
+
+    path (str) -- the path to the zip to perform a sanity check on
+
+    Yields a two-element tuple, firest element is path, and second is "error."
+
+    """
+
+
+    zip_file = ZipFile(path, 'r')
+    zip_index = zip_file_index(zip_file)
+    zip_file.close()
+
+    for path in zip_index:
+
+        error = True
+
+        for directory in lib.SETTINGS['directories'].values():
+
+            if path.startswith(directory + '/'):
+                error = False
+                break
+
+        yield (path, error)
+
+
 def plugin_check(path):
     """Used to check a plugin before installing.
     
@@ -293,12 +320,14 @@ def plugin_check(path):
     
     """
 
-    zip_file = ZipFile(path, 'r')
-    zip_index = zip_file_index(zip_file)
-    zip_file.close()
+    for path, error in sanity_check(path):
 
-    for path in zip_file_index(zip_file):
-        print path
+        if error:
+            message = 'FAIL:    '
+        else:
+            message = 'SUCCESS: '
+
+        print message + path
 
     return None
 
@@ -312,12 +341,17 @@ def file_checksum(path):
 def plugin_install(path, update=False):
     """Plugin zip-extraction protocol."""
 
+    # sanity check
+    for test_path, error in sanity_check(path):
+
+        if error:
+            print 'PLUGIN NOT SANE: ' + test_path
+            return None
+
+    # now open the archive...
     zip_file = ZipFile(path, 'r')
     zip_index = zip_file_index(zip_file)
     zip_file_name = path.rsplit('/', 1)[-1].replace('.zip', '')
-
-    # create a temporary directory to work in
-    # os.makedir('tmp')
 
     # setup database connection
     conn = sqlite3.connect('sakura.db')
@@ -350,7 +384,7 @@ def plugin_install(path, update=False):
           (
            name TEXT UNIQUE,
            date_installed TEXT UNIQUE DEFAULT CURRENT_TIMESTAMP,
-           sane INTEGER DEFAULT 0
+           error INTEGER DEFAULT 0
           )
           '''
     cursor.execute(sql)
@@ -358,7 +392,12 @@ def plugin_install(path, update=False):
     # insert record of install
     if not update:
         sql = 'INSERT INTO plugin_meta (name) VALUES (?)'
-        cursor.execute(sql, (zip_file_name,))
+
+        try:
+            cursor.execute(sql, (zip_file_name,))
+        except sqlite3.IntegrityError:
+            print 'plugin already installed: ' + zip_file_name
+            return False
 
 
     # record files extracted...
@@ -425,10 +464,27 @@ def plugin_install(path, update=False):
             print path + ' overwriten'
 
     zip_file.close()
-    sql = 'UPDATE plugin_meta SET sane=1 WHERE name=?'
+    sql = 'UPDATE plugin_meta SET error=0 WHERE name=?'
     cursor.execute(sql, (zip_file_name,))
     conn.commit()
     conn.close()
+    return True
+
+
+def plugin_list():
+    
+    conn = sqlite3.connect('sakura.db')
+    cursor = conn.cursor()
+    sql = 'SELECT * FROM plugin_meta'
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    conn.close()
+
+    for name, date_installed, error in data:
+        print 'NAME:      ' + name
+        print 'INSTALLED: ' + date_installed
+        print 'ERRORS:    ' + 'YES' if error else 'NO'
+        print
 
 
 def plugin_delete(name):
@@ -491,10 +547,6 @@ def plugin_delete(name):
     conn.commit()
     conn.close()
     return None
-
-
-def plugin_list():
-    pass
 
 
 def plugin_error(plugin):
@@ -629,6 +681,8 @@ elif args.check:
     plugin_check(args.check)
 elif args.refresh:
     cache()
+elif args.list:
+    plugin_list()
 elif args.httpd:
     httpd()
 elif args.backup:
