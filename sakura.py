@@ -17,6 +17,7 @@ import BaseHTTPServer
 import CGIHTTPServer
 from zipfile import ZipFile
 import sqlite3
+import hashlib
 
 
 # CONFIG AND CONSTANTS ########################################################
@@ -302,7 +303,13 @@ def plugin_check(path):
     return None
 
 
-def plugin_install(path):
+def file_checksum(path):
+
+    with open(path, 'rb') as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+def plugin_install(path, update=False):
     """Plugin zip-extraction protocol."""
 
     zip_file = ZipFile(path, 'r')
@@ -315,22 +322,84 @@ def plugin_install(path):
     # setup database connection
     conn = sqlite3.connect('sakura.db')
     cursor = conn.cursor()
+
+    # assure plugin_files table exists...
     sql = '''\
           CREATE TABLE IF NOT EXISTS plugin_files
           (
            path TEXT UNIQUE,
-           plugin TEXT
+           plugin TEXT,
+           original_checksum TEXT UNIQUE
           )
           '''
     cursor.execute(sql)
-    sql = 'INSERT OR REPLACE INTO plugin_files (path, plugin) VALUES (?, ?)'
+    # keep md5 checksum of file after extracting for updates
+    # do not overwrite files that have a changed md5
 
+    # assure plugin_meta exists
+    sql = '''\
+          CREATE TABLE IF NOT EXISTS plugin_meta
+          (
+           name TEXT UNIQUE,
+           date_installed TEXT UNIQUE DEFAULT CURRENT_TIMESTAMP,
+           sane INTEGER DEFAULT 0
+          )
+          '''
+    cursor.execute(sql)
+
+    # insert record of install
+    if not update:
+        sql = 'INSERT INTO plugin_meta (name) VALUES (?)'
+        cursor.execute(sql, (zip_file_name,))
+
+
+    # record files extracted...
     for path in zip_index:
+
+        try:
+            last_checksum = file_checksum(path)
+        except IOError:
+            pass
+
         zip_file.extract(path)
-        cursor.execute(sql, (path, zip_file_name))
-        conn.commit()  # in case install fails!
+        new_checksum = file_checksum(path)
+
+        if update:
+            # if file was never modified, overwrite if update
+            sql = '''\
+                  SELECT original_checksum FROM plugin_files
+                  WHERE path=?
+                  '''
+            cursor.execute(sql, (path,))
+            original_checksum = cursor.fetchone()[0]
+            # raise Exception((last_checksum, original_checksum))
+
+            if last_checksum != original_checksum:
+                question = 'replace modified file %s (y/n)? ' % path
+                permission = raw_input(question)
+                
+                if permission == 'y':
+                    pass
+                else:
+                    pass
+
+        sql = '''\
+              INSERT INTO plugin_files (path, plugin, original_checksum)
+              VALUES (?, ?, ?)
+              '''
+
+        try:
+            cursor.execute(sql, (path, zip_file_name, new_checksum))
+            conn.commit()  # in case install fails!
+
+        except sqlite3.IntegrityError:
+            print path + ' overwriten'
 
     zip_file.close()
+
+    sql = 'UPDATE plugin_meta SET sane=1 WHERE name=?'
+    cursor.execute(sql, (zip_file_name,))
+    conn.commit()
     conn.close()
 
 
@@ -348,19 +417,26 @@ def plugin_delete(name):
         plugin_error(name)
 
     # delete paths
-    for path in paths:
-
-        try:
-            os.remove(path[0])
-        except OSError:
-            continue
-
     conn = sqlite3.connect('sakura.db')
     cursor = conn.cursor()
-    sql = 'DELETE FROM plugin_files WHERE plugin=?'
+
+    for path in paths:
+        path = path[0]
+
+        try:
+            os.remove(path)
+        except OSError:
+            'could not delete ' + path
+
+        sql = 'DELETE FROM plugin_files WHERE plugin=? AND path=?'
+        cursor.execute(sql, (name, path))
+        conn.commit()  # incase deltion is interrupted
+
+    sql = 'DELETE FROM plugin_meta WHERE name=?'
     cursor.execute(sql, (name,))
     conn.commit()
     conn.close()
+    return None
 
 
 def plugin_list():
@@ -375,6 +451,8 @@ def plugin_error(plugin):
 def plugin_info(plugin):
     """Display files installed by "plugin."
     
+    Should also print plugin_meta data.
+
     """
 
     conn = sqlite3.connect('sakura.db')
@@ -441,6 +519,13 @@ parser.add_argument(
                     help=info_help
                    )
 
+# plugin update
+update_help = 'Update a plugin by name.'
+parser.add_argument(
+                    '--update',
+                    help=update_help
+                   )
+
 # plugin check
 check_help = 'Check a plugin before you install it!'
 parser.add_argument(
@@ -480,6 +565,8 @@ if args.setup:
     setup()
 elif args.install:
     plugin_install(args.install)
+elif args.update:
+    plugin_install(args.update, update=True)
 elif args.info:
     plugin_info(args.info)
 elif args.delete:
