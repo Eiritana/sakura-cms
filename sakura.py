@@ -179,6 +179,10 @@ def flush_cache():
 
     try:
         cache_directory = lib.SETTINGS['directories']['cache']
+
+        if lib.SETTINGS['backups']['before_cache'] == 'yes':
+            backup()
+
         shutil.rmtree(cache_directory)
 
     except:
@@ -231,15 +235,17 @@ def backup():
     """
 
     backup_directory = lib.SETTINGS['directories']['backups']
-    content_directory = lib.SETTINGS['directories']['content']
 
     date_time = datetime.now().isoformat()
     backup_directory += '/' + date_time + '/'
     os.mkdir(backup_directory)
 
+    # gleem settings first...
+    backup_conf = lib.SETTINGS['backups'].copy()
+    backup_conf.pop('before_cache')
+
     # make specified backups
-    backups = lib.SETTINGS['backups']
-    pending_backups = [k for k,v in backups.items() if v == 'yes']
+    pending_backups = [k for k,v in backup_conf.items() if v == 'yes']
 
     for directory in pending_backups:
         archive_path = backup_directory + directory
@@ -277,7 +283,12 @@ def zip_file_index(zip_file):
 
 
 def plugin_check(path):
-    """Used to check a plugin before installing."""
+    """Used to check a plugin before installing.
+    
+    Assure all files extract to any subdirectories of a sakura system
+    directory, e.g., cgi/, parsers/, content/.
+    
+    """
 
     zip_file = ZipFile(path, 'r')
     zip_index = zip_file_index(zip_file)
