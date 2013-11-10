@@ -1,0 +1,59 @@
+{{head.txt title='Sakura @ Blog'}}
+
+<h2 id="article-title">Sakura</h2>
+<p>Sakura is a tool which "parses" HTML documents you've written, for [[special tags]].
+Said tags will generate blog indexes, table of contents, breadcrumbs, include CSS,
+insert a text file's contents, and more!</p>
+
+<h3>INSTALLATION</h3>
+
+<p>LXML is required. In FBSD:</p>
+<p>pkg install py27-lxml</p>
+
+<h3>CONFIGURATION</h3>
+
+<p>You will definitely want to change basehref in config/settings.ini!</p>
+<p>Looking at content/porfolio/index.html should give you a pretty good idea of how to use, as well as pieces/portfolio-summary.txt.</p>
+
+<h3>DIRECTORIES</h3>
+
+<dl>
+ <dt>cache/</dt>
+ <dd>The parsed versions of the files in content/ will go here.</dd>
+
+ <dt>backup/</dt>
+ <dd>content, cache, settings are backed-up to here... <dt>
+
+ <dt>content/</dt>
+ <dd>Place all your website files here. These files will be parsed, then put into
+cache/. <dt>
+
+ <dt>pieces/</dt>
+ <dd>You can call these plaintext files as inclusions for content. <dt>
+</dl>
+
+<h3>FUNCTIONS</h3>
+
+<p>Below are a few examples of built-in functions you may use in pieces/* files, or content/* files...</p>
+
+<dl>
+ <dt>(css style.css)</dt>
+ <dd>Links "style.css" to this page, by inserting <code>&gt;link href&hellip;</code> in the header.</dd>
+
+ <dt>(breadcrumbs)</dt>
+ <dd>Generate typical HTML "breadcrumbs" based on file path.</dd>
+
+ <dt>(config section key)</dt>
+ <dd>Get the value for "key" in "section" from the settings.ini.</dd>
+
+ <dt>(table-of-contents)</dt>
+ <dd>Automatically generate a table of contents based upon the headings
+therein the page.</dd>
+
+ <dt>(nav-selector id)</dt>
+ <dd>Apply the id of "active" to the navigation with the id "id."</dd>
+</dl>
+
+((blog-index))
+
+{{foot.txt}}
