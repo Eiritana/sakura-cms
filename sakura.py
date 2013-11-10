@@ -361,9 +361,6 @@ def plugin_install(path, update=False):
         except IOError:
             pass
 
-        zip_file.extract(path)
-        new_checksum = file_checksum(path)
-
         if update:
             # if file was never modified, overwrite if update
             sql = '''\
@@ -379,10 +376,16 @@ def plugin_install(path, update=False):
                 permission = raw_input(question)
                 
                 if permission == 'y':
-                    pass
+                   pass
                 else:
-                    pass
+                    print 'skipping %s' % path
+                    continue
+            else:
+                print "%s hasn't changed!" % path
+                continue
 
+        zip_file.extract(path)
+        new_checksum = file_checksum(path)
         sql = '''\
               INSERT INTO plugin_files (path, plugin, original_checksum)
               VALUES (?, ?, ?)
@@ -396,7 +399,6 @@ def plugin_install(path, update=False):
             print path + ' overwriten'
 
     zip_file.close()
-
     sql = 'UPDATE plugin_meta SET sane=1 WHERE name=?'
     cursor.execute(sql, (zip_file_name,))
     conn.commit()
