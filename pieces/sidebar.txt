@@ -1,5 +1,0 @@
-<aside id="sidebar">
-((breadcrumbs))
-((table-of-contents))
-((document-meta))
-</aside>

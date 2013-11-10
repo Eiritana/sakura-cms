@@ -333,8 +333,16 @@ def plugin_install(path, update=False):
           )
           '''
     cursor.execute(sql)
-    # keep md5 checksum of file after extracting for updates
-    # do not overwrite files that have a changed md5
+    
+    # assure plugin_directories table exists...
+    sql = '''
+          CREATE TABLE IF NOT EXISTS plugin_directories
+          (
+           path TEXT UNIQUE,
+           plugin TEXT
+          )
+          '''
+    cursor.execute(sql)
 
     # assure plugin_meta exists
     sql = '''\
@@ -389,7 +397,21 @@ def plugin_install(path, update=False):
                 continue
 
         zip_file.extract(path)
-        new_checksum = file_checksum(path)
+
+        # test if directory
+        try:
+            new_checksum = file_checksum(path)
+
+        except IOError:
+            # can't create checksum for directory!
+            # skip checksum stuff--custom sql here!
+            sql = '''
+                  INSERT INTO plugin_directories (path, plugin)
+                  VALUES (?, ?)
+                  '''
+            cursor.execute(sql, (path, zip_file_name))
+            continue
+
         sql = '''\
               INSERT INTO plugin_files (path, plugin, original_checksum)
               VALUES (?, ?, ?)
@@ -432,12 +454,38 @@ def plugin_delete(name):
         try:
             os.remove(path)
         except OSError:
-            'could not delete ' + path
+            print 'could not delete ' + path
+            continue
 
         sql = 'DELETE FROM plugin_files WHERE plugin=? AND path=?'
         cursor.execute(sql, (name, path))
         conn.commit()  # incase deltion is interrupted
 
+    # remove directories!
+    sql = '''
+          SELECT path FROM plugin_directories WHERE plugin=?
+          ORDER BY LENGTH(path) DESC
+          '''
+    cursor.execute(sql, (name,))
+    paths = cursor.fetchall()
+
+    if not paths:
+        plugin_error(name)
+
+    for path in paths:
+        path = path[0]
+
+        try:
+            os.rmdir(path)
+        except OSError:
+            print 'could not delete ' + path
+            continue
+
+        sql = 'DELETE FROM plugin_directories WHERE plugin=? AND path=?'
+        cursor.execute(sql, (name, path))
+        conn.commit()
+
+    # finish up! completely remove...
     sql = 'DELETE FROM plugin_meta WHERE name=?'
     cursor.execute(sql, (name,))
     conn.commit()
