@@ -368,8 +368,12 @@ def plugin_install(path, update=False):
                   WHERE path=?
                   '''
             cursor.execute(sql, (path,))
-            original_checksum = cursor.fetchone()[0]
-            # raise Exception((last_checksum, original_checksum))
+
+            try:
+                original_checksum = cursor.fetchone()[0]
+            except TypeError:
+                print '%s does not exist' % path
+                sys.exit(1)
 
             if last_checksum != original_checksum:
                 question = 'replace modified file %s (y/n)? ' % path
