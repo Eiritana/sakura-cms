@@ -259,9 +259,11 @@ class ThreadingCGIServer(SocketServer.ThreadingMixIn,
 
 
 def httpd():
+    address = lib.SETTINGS['httpd']['address']
+    port = int(lib.SETTINGS['httpd']['port'])
     handler = CGIHTTPServer.CGIHTTPRequestHandler
     handler.cgi_directories = ['/cgi']
-    server = ThreadingCGIServer(('', 8080), handler)
+    server = ThreadingCGIServer((address, port), handler)
 
     try:
         while 1:
