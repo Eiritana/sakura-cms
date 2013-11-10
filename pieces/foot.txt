@@ -1,9 +1,0 @@
-</article>
-</div>
-
-<footer class="center-width border-shadow">
- <p>Footer links</p>
-</footer>
-
-</body>
-</html>

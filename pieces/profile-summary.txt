@@ -1,5 +1,0 @@
-<dl>
- <dt><a href="portfolio/%%document%%">%%name%%</a></dt>
- <dd class="profile-pic"><img src="%%image%%"></dd>
- <dd>%%description%%</dd>
-</dl>
