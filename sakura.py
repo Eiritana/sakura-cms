@@ -48,21 +48,17 @@ def tag_type_exists(open_bracket, close_bracket, document):
     """Return True if tags with bracket types exist, else false."""
 
     pattern = open_bracket + '(.*)' + close_bracket
-
-    if re.search(pattern, document):
-        return True
-
-    else:
-        return False
+    return True if re.search(pattern, document) else False
 
 
 def minify(document_path, document):
     """Compress CSS and HTML mostly by removing whitespace."""
 
-    document_type = document_path.rsplit('.', 1)[-1]
+    __, file_extension = os.path.splitext(document_path)
+    file_extension = file_extension.replace('.', '')
     document = document.strip()
 
-    if document_type in ('html', 'css'):
+    if file_extension in ('html', 'css'):
         document = document.replace('  ', ' ').replace('\n', '')
 
     return document
@@ -104,16 +100,20 @@ def load_parsers(public):
     parsers = {}
 
     for file_name in glob(package + '/*.py'):
-        module_name = file_name.split('/', 1)[1].replace('.py', '')
+        module_name, __ = os.path.splitext(os.path.basename(file_name))
 
         if module_name == "__init__":
             continue
 
-        # setup the plugin entry
-        parser_path = "%s.%s" % (package, module_name)
-        parser_config = __import__(parser_path, fromlist=["CONFIG"])
+        # import the module...
+        module_import = "%s.%s" % (package, module_name)
+
+        # attempt to read and utilize the parser's CONFIG settings
+        parser_config = __import__(module_import, fromlist=["CONFIG"])
         parser_config = parser_config.CONFIG
-        replaces = parser_config['replaces']
+        replaces = parser_config['replaces']  # what text ((calls)) this parser
+
+        # load pre-defined 
         args = [public[arg] for arg in parser_config['args']]
         calls = parser_config['calls']
         func = __import__(parser_path, fromlist=[calls])
@@ -151,6 +151,7 @@ def parse(document_path):
         if ' ' in element['contents']:
             __, args = element['contents'].split(' ', 1)
             user_defined_args = args.split(' ')
+
         else:
             user_defined_args = None
 
@@ -272,6 +273,11 @@ class ThreadingCGIServer(SocketServer.ThreadingMixIn,
 
 
 def httpd():
+    """THIS IS A TOY. It is only here so users may test parsed contents before
+    making them public.
+
+    """
+
     address = lib.SETTINGS['httpd']['address']
     port = int(lib.SETTINGS['httpd']['port'])
     handler = CGIHTTPServer.CGIHTTPRequestHandler
