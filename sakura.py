@@ -93,6 +93,13 @@ def calls_piece(document, piece_directory):
 
 
 def load_parsers(public):
+    """Returns a dictionary of "parsers" (functions) and their arguments.
+    
+    Load functions to evaluate arguments/values pre-defined in "public"
+    (dictionary).
+
+    """
+
     package = 'parsers'
     parsers = {}
 
@@ -147,6 +154,7 @@ def parse(document_path):
         else:
             user_defined_args = None
 
+        # room for elaboration on this...
         public = {
                   'document_path': document_path,
                   'document': document,
@@ -220,6 +228,10 @@ def cache():
 
 
 def setup():
+    """Lazy installer; it sets up the directory
+    structure for Sakura.
+
+    """
 
     for directory_type, directory_path in lib.SETTINGS['directories'].items():
 
@@ -231,19 +243,16 @@ def setup():
 
 
 def backup():
-    """Zip the config and content directories into a backup/date folder
-
-    """
+    """Zip the config and content directories into a backup/date folder"""
 
     backup_directory = lib.SETTINGS['directories']['backups']
-
     date_time = datetime.now().isoformat()
     backup_directory += '/' + date_time + '/'
     os.mkdir(backup_directory)
 
-    # gleem settings first...
+    # get the directories to backup, plus a setting
     backup_conf = lib.SETTINGS['backups'].copy()
-    backup_conf.pop('before_cache')
+    backup_conf.pop('before_cache')  # not a directory to backup!
 
     # make specified backups
     pending_backups = [k for k,v in backup_conf.items() if v == 'yes']
@@ -251,6 +260,9 @@ def backup():
     for directory in pending_backups:
         archive_path = backup_directory + directory
         shutil.make_archive(archive_path, 'zip', directory)
+
+
+# HTTP Daemon/Testing Tool ####################################################
 
 
 class ThreadingCGIServer(SocketServer.ThreadingMixIn,
@@ -275,12 +287,18 @@ def httpd():
         print "Finished"
 
 
+# PLUGIN ######################################################################
+# Plugin management
+
+
 def plugin_remote_install(path):
     # get file, put locally, set path
     plugin_install(path)
 
 
 def zip_file_index(zip_file):
+    """Return a list of paths in zip_file."""
+
     is_sys_dir = lambda x: x.count('/') == 1 and x[-1] == '/'
     return [x for x in zip_file.namelist() if not is_sys_dir(x)]
 
@@ -333,6 +351,10 @@ def plugin_check(path):
 
 
 def file_checksum(path):
+    """Generate a checksum to compare against later to detect
+    file modification.
+
+    """
 
     with open(path, 'rb') as f:
         return hashlib.sha256(f.read()).hexdigest()
@@ -472,6 +494,7 @@ def plugin_install(path, update=False):
 
 
 def plugin_list():
+    """Display installed plugin information."""
     
     conn = sqlite3.connect('sakura.db')
     cursor = conn.cursor()
@@ -550,6 +573,7 @@ def plugin_delete(name):
 
 
 def plugin_error(plugin):
+    """This sucks. Should have proper exception?."""
     print 'no such plugin "%s" installed' % plugin
     sys.exit(1)
 
