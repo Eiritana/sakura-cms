@@ -9,7 +9,7 @@ import shutil
 import argparse
 from cStringIO import StringIO
 from datetime import datetime
-from lxml import etree
+#from lxml import etree
 import lib
 from glob import glob
 import SocketServer
@@ -74,7 +74,7 @@ def calls_piece(document, piece_directory):
     # replace {{piece}} calls
     # full element, element contents, and element name!
     for element in iter_tags('{{', '}}', document):
-        piece_tag = element['contents'].split(' ', 1)[0]
+        piece_tag = element['name']
         path = piece_directory + '/' + piece_tag
 
         # retrieve file specified in {{piece}} call
