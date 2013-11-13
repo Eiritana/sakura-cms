@@ -342,6 +342,9 @@ def plugin_check(path):
     Assure all files extract to any subdirectories of a sakura system
     directory, e.g., cgi/, parsers/, content/.
     
+    Maybe this should take a zipfile object; should also perform
+    zip_file.testzip()
+
     """
 
     for path, error in sanity_check(path):
@@ -364,6 +367,15 @@ def file_checksum(path):
 
     with open(path, 'rb') as f:
         return hashlib.sha256(f.read()).hexdigest()
+
+
+def plugin_append(plugin_path, *paths):
+    """Add a series of paths (directories) to a plugin, recursively."""
+    
+    with ZipFile(plugin_path) as zip_file:
+
+        for path in paths:
+            zip_file.write(path)
 
 
 def plugin_install(path, update=False):
@@ -448,7 +460,8 @@ def plugin_install(path, update=False):
                 original_checksum = cursor.fetchone()[0]
             except TypeError:
                 print '%s does not exist' % path
-                sys.exit(1)
+                #sys.exit(1)
+                continue
 
             if last_checksum != original_checksum:
                 question = 'replace modified file %s (y/n)? ' % path
@@ -662,6 +675,13 @@ parser.add_argument(
                     help=update_help
                    )
 
+# plugin append
+append_help = 'Add a series of paths to a plugin, recursively.'
+parser.add_argument(
+                    '--append',
+                    help=append_help
+                   )
+
 # plugin check
 check_help = 'Check a plugin before you install it!'
 parser.add_argument(
@@ -707,6 +727,8 @@ elif args.info:
     plugin_info(args.info)
 elif args.delete:
     plugin_delete(args.delete)
+elif args.append:
+    plugin_append(*args.append)
 elif args.check:
     plugin_check(args.check)
 elif args.refresh:
