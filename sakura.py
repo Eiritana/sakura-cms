@@ -15,7 +15,7 @@ from glob import glob
 import SocketServer
 import BaseHTTPServer
 import CGIHTTPServer
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 import sqlite3
 import hashlib
 
@@ -369,13 +369,27 @@ def file_checksum(path):
         return hashlib.sha256(f.read()).hexdigest()
 
 
-def plugin_append(plugin_path, *paths):
+def plugin_insert(plugin_path, *paths):
     """Add a series of paths (directories) to a plugin, recursively."""
     
-    with ZipFile(plugin_path) as zip_file:
+    zip_file = ZipFile(plugin_path, 'a')
 
-        for path in paths:
-            zip_file.write(path)
+    for path in paths:
+
+        if os.path.isfile(path):
+            zip_file.write(path, path, ZIP_DEFLATED)
+            continue
+
+        # it's a directory, so recursively add files from a directory.
+        for directory, files in lib.index(path).items():
+            zip_file.write(directory, directory, ZIP_DEFLATED)
+
+            for file_name in files:
+                file_path = directory + '/' + file_name
+                zip_file.write(file_path, file_path, ZIP_DEFLATED)
+
+    zip_file.close()
+    return None
 
 
 def plugin_install(path, update=False):
@@ -675,11 +689,12 @@ parser.add_argument(
                     help=update_help
                    )
 
-# plugin append
-append_help = 'Add a series of paths to a plugin, recursively.'
+# plugin insert
+insert_help = 'Add a series of paths to a plugin, recursively.'
 parser.add_argument(
-                    '--append',
-                    help=append_help
+                    '--insert',
+                    nargs='+',
+                    help=insert_help
                    )
 
 # plugin check
@@ -727,8 +742,8 @@ elif args.info:
     plugin_info(args.info)
 elif args.delete:
     plugin_delete(args.delete)
-elif args.append:
-    plugin_append(*args.append)
+elif args.insert:
+    plugin_insert(*args.insert)
 elif args.check:
     plugin_check(args.check)
 elif args.refresh:
