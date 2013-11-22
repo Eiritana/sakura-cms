@@ -116,7 +116,7 @@ def load_parsers(public):
         # load pre-defined 
         args = [public[arg] for arg in parser_config['args']]
         calls = parser_config['calls']
-        func = __import__(parser_path, fromlist=[calls])
+        func = __import__(module_import, fromlist=[calls])
         func = getattr(func, calls)
         parsers[replaces] = (func, args)
 
