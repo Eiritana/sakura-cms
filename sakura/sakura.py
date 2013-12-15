@@ -6,11 +6,10 @@ import os
 import sys
 import re
 import shutil
-import argparse
 from cStringIO import StringIO
 from datetime import datetime
 #from lxml import etree
-import lib
+import common as lib
 from glob import glob
 import SocketServer
 import BaseHTTPServer
@@ -60,12 +59,13 @@ def minify(document_path, document):
 
 
 def include(document, include_directory):
-    """Replaces/parses %%inc%% calls.
+    """Replaces instances of %%inc *.*%% with the contents of a plaintext file.
     
-    Example: %%inc foo.txt%%%
+    Example: %%inc foo.txt%% would be replaced by the file contents of
+    include/foo.txt.
     
     document (str) -- document being parsed
-    include_directory (str) -- directory containing the file to call/include
+    include_directory (str) -- this is just the include directory
     
     """
 
@@ -638,128 +638,4 @@ def plugin_info(plugin):
 
     for file_path in file_paths:
         print file_path[0]
-
-
-# COMMAND LINE USAGE ##########################################################
-
-
-description = (
-               'Sakura content management system; parses files, then "caches" '
-               'them.'
-              )
-function = argparse.ArgumentParser(description=description, prog='sakura')
-
-refresh_help = 'Clear CACHE and reparse CONTENT into CACHE.'
-function.add_argument(
-                    '--refresh',
-                    help=refresh_help,
-                    dest='refresh',
-                    action='store_true'
-                   )
-
-setup_help = 'Setup Sakura directories.'
-function.add_argument(
-                    '--setup',
-                    help=setup_help,
-                    dest='setup',
-                    action='store_true'
-                   )
-
-# built-in HTTP, CGI server
-httpd_help = 'Start HTTPD server.'
-function.add_argument(
-                    '--httpd',
-                    help=httpd_help,
-                    dest='httpd',
-                    action='store_true'
-                   )
-
-# plugin install
-install_help = 'Install a plugin (.zip)'
-function.add_argument(
-                    '--install',
-                    help=install_help,
-                   )
-
-# plugin info
-info_help = 'Display files belonging to a plugin.'
-function.add_argument(
-                    '--info',
-                    help=info_help
-                   )
-
-# plugin update
-update_help = 'Update a plugin by name.'
-function.add_argument(
-                    '--update',
-                    help=update_help
-                   )
-
-# plugin insert
-insert_help = 'Add a series of paths to a plugin, recursively.'
-function.add_argument(
-                    '--insert',
-                    nargs='+',
-                    help=insert_help
-                   )
-
-# plugin check
-check_help = 'Check a plugin before you install it!'
-function.add_argument(
-                    '--check',
-                    help=check_help
-                   )
-
-# plugin remove
-delete_help = 'Delete a plugin (by name)'
-function.add_argument(
-                    '--delete',
-                    help=delete_help,
-                   )
-
-# plugin list
-list_help = 'List installed plugins'
-function.add_argument(
-                    '--list',
-                    help=list_help,
-                    dest='list',
-                    action='store_true'
-                   )
-
-# backup
-backup_help = 'Backup defined Sakura directories.'
-function.add_argument(
-                    '--backup',
-                    help=backup_help,
-                    dest='backup',
-                    action='store_true'
-                   )
-
-# add --restore
-args = function.parse_args()
-
-if args.setup:
-    setup()
-elif args.install:
-    plugin_install(args.install)
-elif args.update:
-    plugin_install(args.update, update=True)
-elif args.info:
-    plugin_info(args.info)
-elif args.delete:
-    plugin_delete(args.delete)
-elif args.insert:
-    plugin_insert(*args.insert)
-elif args.check:
-    plugin_check(args.check)
-elif args.refresh:
-    cache()
-elif args.list:
-    plugin_list()
-elif args.httpd:
-    httpd()
-elif args.backup:
-    backup()
-else:
-    function.print_help()
 

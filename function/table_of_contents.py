@@ -1,4 +1,4 @@
-from lib import ini
+from sakura.lib import ini
 from lxml import etree
 from cStringIO import StringIO
 

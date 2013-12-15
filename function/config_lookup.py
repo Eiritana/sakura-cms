@@ -1,4 +1,4 @@
-import lib
+from sakura import lib
 
 
 CONFIG = {

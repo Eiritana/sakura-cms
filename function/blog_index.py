@@ -1,4 +1,4 @@
-import lib
+from sakura import lib
 from cStringIO import StringIO
 from lxml import etree
 from page_meta import page_meta

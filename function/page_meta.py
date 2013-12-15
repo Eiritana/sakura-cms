@@ -1,4 +1,4 @@
-from lib import ini
+from sakura.lib import ini
 import os.path, time
 
 
