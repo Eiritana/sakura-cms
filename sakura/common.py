@@ -1,3 +1,9 @@
+"""Common utilities used across multiple modules.
+
+Configuration file management, index generation.
+
+"""
+
 import ConfigParser
 from collections import OrderedDict
 import os

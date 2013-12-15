@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>sakura.sakura</title>
+  <title>sakura.parse</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -35,7 +35,7 @@
     <td width="100%">
       <span class="breadcrumbs">
         <a href="sakura-module.html">Package&nbsp;sakura</a> ::
-        Module&nbsp;sakura
+        Module&nbsp;parse
       </span>
     </td>
     <td>
@@ -45,41 +45,16 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="sakura.sakura-module.html"
+            >]&nbsp;|&nbsp;<a href="sakura.parse-module.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== MODULE DESCRIPTION ==================== -->
-<h1 class="epydoc">Module sakura</h1><p class="nomargin-top"><span class="codelink"><a href="sakura.sakura-pysrc.html">source&nbsp;code</a></span></p>
-<p>Parses files in the content directory.</p>
+<h1 class="epydoc">Module parse</h1><p class="nomargin-top"><span class="codelink"><a href="sakura.parse-pysrc.html">source&nbsp;code</a></span></p>
+<p>Tools for parsing a document.</p>
 
-<!-- ==================== CLASSES ==================== -->
-<a name="section-Classes"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Classes</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-Classes"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="sakura.sakura.ThreadingCGIServer-class.html" class="summary-name">ThreadingCGIServer</a>
-    </td>
-  </tr>
-</table>
 <!-- ==================== FUNCTIONS ==================== -->
 <a name="section-Functions"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -103,10 +78,12 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="flush_cache"></a><span class="summary-sig-name">flush_cache</span>()</span><br />
-      Returns True if cache was &quot;flushed.&quot;</td>
+          <td><span class="summary-sig"><a href="sakura.parse-module.html#iter_tags" class="summary-sig-name">iter_tags</a>(<span class="summary-sig-arg">tag</span>,
+        <span class="summary-sig-arg">document</span>)</span><br />
+      Yields a dictionary of data for the current &quot;tag&quot; in 
+      iteration.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="sakura.sakura-pysrc.html#flush_cache">source&nbsp;code</a></span>
+            <span class="codelink"><a href="sakura.parse-pysrc.html#iter_tags">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -120,11 +97,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="cache"></a><span class="summary-sig-name">cache</span>()</span><br />
-      Completely parse all viable files therein the content directory, to 
-      the cache directory.</td>
+          <td><span class="summary-sig"><a href="sakura.parse-module.html#tag_type_exists" class="summary-sig-name">tag_type_exists</a>(<span class="summary-sig-arg">tag</span>,
+        <span class="summary-sig-arg">document</span>)</span><br />
+      Return True if tags with bracket types exist, else false.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="sakura.sakura-pysrc.html#cache">source&nbsp;code</a></span>
+            <span class="codelink"><a href="sakura.parse-pysrc.html#tag_type_exists">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -138,10 +115,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="setup"></a><span class="summary-sig-name">setup</span>()</span><br />
-      Lazy installer; it sets up the directory structure for Sakura.</td>
+          <td><span class="summary-sig"><a href="sakura.parse-module.html#minify" class="summary-sig-name">minify</a>(<span class="summary-sig-arg">document_path</span>,
+        <span class="summary-sig-arg">document</span>)</span><br />
+      Compress CSS and HTML mostly by removing whitespace.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="sakura.sakura-pysrc.html#setup">source&nbsp;code</a></span>
+            <span class="codelink"><a href="sakura.parse-pysrc.html#minify">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -155,10 +133,12 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="backup"></a><span class="summary-sig-name">backup</span>()</span><br />
-      Zip the config and content directories into a backup/date folder</td>
+          <td><span class="summary-sig"><a href="sakura.parse-module.html#include" class="summary-sig-name">include</a>(<span class="summary-sig-arg">document</span>,
+        <span class="summary-sig-arg">include_directory</span>)</span><br />
+      Replaces instances of %%inc *.*%% with the contents of a plaintext 
+      file.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="sakura.sakura-pysrc.html#backup">source&nbsp;code</a></span>
+            <span class="codelink"><a href="sakura.parse-pysrc.html#include">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -172,10 +152,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="sakura.sakura-module.html#httpd" class="summary-sig-name">httpd</a>()</span><br />
-      THIS IS A TOY.</td>
+          <td><span class="summary-sig"><a href="sakura.parse-module.html#parse" class="summary-sig-name">parse</a>(<span class="summary-sig-arg">document_path</span>)</span><br />
+      Sakura element function, returns string.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="sakura.sakura-pysrc.html#httpd">source&nbsp;code</a></span>
+            <span class="codelink"><a href="sakura.parse-pysrc.html#parse">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -227,22 +207,125 @@
   </td>
 </tr>
 </table>
-<a name="httpd"></a>
+<a name="iter_tags"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">httpd</span>()</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">iter_tags</span>(<span class="sig-arg">tag</span>,
+        <span class="sig-arg">document</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="sakura.sakura-pysrc.html#httpd">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="sakura.parse-pysrc.html#iter_tags">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>THIS IS A TOY. It is only here so users may test parsed contents 
-  before making them public.</p>
+  <p>Yields a dictionary of data for the current &quot;tag&quot; in 
+  iteration.</p>
+  <p>tag (str) -- the name of the element. %%tag%% document (str) -- 
+  iterate tag in this document</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>document = <span class="py-string">'%%func foo%% %%var bar%% %%inc foo.txt%% %%func bar%%'</span>
+<span class="py-prompt">&gt;&gt;&gt; </span>[element[<span class="py-string">'name'</span>] <span class="py-keyword">for</span> element <span class="py-keyword">in</span> iter_tags(<span class="py-string">'func'</span>, document)]
+<span class="py-output">['foo', 'bar']</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="tag_type_exists"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">tag_type_exists</span>(<span class="sig-arg">tag</span>,
+        <span class="sig-arg">document</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="sakura.parse-pysrc.html#tag_type_exists">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return True if tags with bracket types exist, else false.</p>
+  <p>tag (str) -- the kind of %%tag%% to search for document (str) -- the 
+  document to search in</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>document = <span class="py-string">'blah %%inc foo.txt%% blah blah %%func bar%%'</span>
+<span class="py-prompt">&gt;&gt;&gt; </span>tag_type_exists(<span class="py-string">'func'</span>, document)
+<span class="py-output">True</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>tag_type_exists(<span class="py-string">'var'</span>, document)
+<span class="py-output">False</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="minify"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">minify</span>(<span class="sig-arg">document_path</span>,
+        <span class="sig-arg">document</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="sakura.parse-pysrc.html#minify">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Compress CSS and HTML mostly by removing whitespace.</p>
+  <p>Not sure if it should be a %%func%%.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="include"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">include</span>(<span class="sig-arg">document</span>,
+        <span class="sig-arg">include_directory</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="sakura.parse-pysrc.html#include">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Replaces instances of %%inc *.*%% with the contents of a plaintext 
+  file.</p>
+  <p>Example: %%inc foo.txt%% would be replaced by the file contents of 
+  include/foo.txt.</p>
+  <p>document (str) -- document being parsed include_directory (str) -- 
+  this is just the include directory</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="parse"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">parse</span>(<span class="sig-arg">document_path</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="sakura.parse-pysrc.html#parse">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Sakura element function, returns string.</p>
+  <p>Parse a document in CONTENT; then parse named variables sent to that 
+  include, if available.</p>
+  <p>document_path (str) -- path of file being parsed</p>
   <dl class="fields">
   </dl>
 </td></tr></table>
