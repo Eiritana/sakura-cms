@@ -20,17 +20,8 @@ import sqlite3
 import hashlib
 
 
-# CONFIG AND CONSTANTS ########################################################
-
-
-ATTRIBUTE_PATTERN = """(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?"""
-
-
-###############################################################################
-
-
-def iter_tags(open_bracket, close_bracket, document):
-    pattern = open_bracket + '(.*)' + close_bracket
+def iter_tags(tag, document):
+    pattern = '%%' + tag + ' (.*)%%'
 
     for match in re.finditer(pattern, document):
         full_element = match.group(0)  # inc. the brackets
@@ -44,15 +35,19 @@ def iter_tags(open_bracket, close_bracket, document):
               }
 
 
-def tag_type_exists(open_bracket, close_bracket, document):
+def tag_type_exists(tag, document):
     """Return True if tags with bracket types exist, else false."""
 
-    pattern = open_bracket + '(.*)' + close_bracket
+    pattern = '%%' + tag + ' (.*)%%'
     return True if re.search(pattern, document) else False
 
 
 def minify(document_path, document):
-    """Compress CSS and HTML mostly by removing whitespace."""
+    """Compress CSS and HTML mostly by removing whitespace.
+    
+    should be a %%func%%
+    
+    """
 
     __, file_extension = os.path.splitext(document_path)
     file_extension = file_extension.replace('.', '')
@@ -64,40 +59,51 @@ def minify(document_path, document):
     return document
 
 
-def calls_piece(document, piece_directory):
-    """Replaces/parses {{piece}} calls."""
+def include(document, include_directory):
+    """Replaces/parses %%inc%% calls.
+    
+    Example: %%inc foo.txt%%%
+    
+    document (str) -- document being parsed
+    include_directory (str) -- directory containing the file to call/include
+    
+    """
 
-    # replace {{piece}} calls
     # full element, element contents, and element name!
-    for element in iter_tags('{{', '}}', document):
-        piece_tag = element['name']
-        path = piece_directory + '/' + piece_tag
+    for element in iter_tags('inc', document):
+        include_tag = element['name']
+        path = include_directory + '/' + include_tag
 
-        # retrieve file specified in {{piece}} call
+        # retrieve file specified in %%inc%% call
         with open(path) as f:
-            piece = f.read().strip()
+            include = f.read().strip()
 
         # use attributes as replacements; %%substitutions%%
-        for match in re.finditer(ATTRIBUTE_PATTERN, element['full']):
-            value = match.group(2)
-            key = '%%' + match.group(1) + '%%'
-            piece = piece.replace(key, value)
+        attribute_pattern = (
+                             """(\S+)=["']?((?:.(?!["']?\s+"""
+                             """(?:\S+)=|[>"']))+.)["']?"""
+                            )
 
-        document = document.replace(element['full'], piece)
+        for match in re.finditer(attribute_pattern, element['full']):
+            value = match.group(2)
+            key = '%%var ' + match.group(1) + '%%'
+            include = include.replace(key, value)
+
+        document = document.replace(element['full'], include)
 
     return document
 
 
-def load_parsers(public):
-    """Returns a dictionary of "parsers" (functions) and their arguments.
+def load_functions(public):
+    """Returns a dictionary of "functions" (functions) and their arguments.
     
     Load functions to evaluate arguments/values pre-defined in "public"
     (dictionary).
 
     """
 
-    package = 'parsers'
-    parsers = {}
+    package = lib.SETTINGS['directories']['function']
+    functions = {}
 
     for file_name in glob(package + '/*.py'):
         module_name, __ = os.path.splitext(os.path.basename(file_name))
@@ -108,44 +114,44 @@ def load_parsers(public):
         # import the module...
         module_import = "%s.%s" % (package, module_name)
 
-        # attempt to read and utilize the parser's CONFIG settings
-        parser_config = __import__(module_import, fromlist=["CONFIG"])
-        parser_config = parser_config.CONFIG
-        replaces = parser_config['replaces']  # what text ((calls)) this parser
+        # attempt to read and utilize the function's CONFIG settings
+        function_config = __import__(module_import, fromlist=["CONFIG"])
+        function_config = function_config.CONFIG
+        replaces = function_config['replaces']  # what text ((calls)) this function
 
         # load pre-defined 
-        args = [public[arg] for arg in parser_config['args']]
-        calls = parser_config['calls']
+        args = [public[arg] for arg in function_config['args']]
+        calls = function_config['calls']
         func = __import__(module_import, fromlist=[calls])
         func = getattr(func, calls)
-        parsers[replaces] = (func, args)
+        functions[replaces] = (func, args)
 
-    return parsers
+    return functions
 
 
 def parse(document_path):
-    """Sakura element parser, returns string.
+    """Sakura element function, returns string.
     
     Parse a document in CONTENT; then parse named variables
-    sent to that piece, if available.
+    sent to that include, if available.
 
     document_path (str) -- path of file being parsed
     
     """
 
-    piece_directory = lib.SETTINGS['directories']['pieces']
+    include_directory = lib.SETTINGS['directories']['include']
 
     # the primary document content
     with open(document_path) as f:
         document = f.read().strip()
 
-    # while pieces still exist, call them!
-    # this solves the problem of having a piece in a piece.
-    while tag_type_exists('{{', '}}', document):
-        document = calls_piece(document, piece_directory)
+    # while includes still exist, call them!
+    # this solves the problem of having an include in an include.
+    while tag_type_exists('inc', document):
+        document = include(document, include_directory)
 
     # replace ((functions)) -- importantly last
-    for element in iter_tags('\(\(', '\)\)', document):
+    for element in iter_tags('func', document):
 
         # we need to test for existing args
         if ' ' in element['contents']:
@@ -162,7 +168,7 @@ def parse(document_path):
                   'element_full': element['full'],
                   'element_name': element['name'],
                  }
-        func, args = load_parsers(public)[element['name']]
+        func, args = load_functions(public)[element['name']]
 
         # if we do have user defined arguments in the element,
         # then append them to the args!
@@ -340,7 +346,7 @@ def plugin_check(path):
     """Used to check a plugin before installing.
     
     Assure all files extract to any subdirectories of a sakura system
-    directory, e.g., cgi/, parsers/, content/.
+    directory, e.g., cgi/, functions/, content/.
     
     Maybe this should take a zipfile object; should also perform
     zip_file.testzip()
@@ -641,10 +647,10 @@ description = (
                'Sakura content management system; parses files, then "caches" '
                'them.'
               )
-parser = argparse.ArgumentParser(description=description, prog='sakura')
+function = argparse.ArgumentParser(description=description, prog='sakura')
 
 refresh_help = 'Clear CACHE and reparse CONTENT into CACHE.'
-parser.add_argument(
+function.add_argument(
                     '--refresh',
                     help=refresh_help,
                     dest='refresh',
@@ -652,7 +658,7 @@ parser.add_argument(
                    )
 
 setup_help = 'Setup Sakura directories.'
-parser.add_argument(
+function.add_argument(
                     '--setup',
                     help=setup_help,
                     dest='setup',
@@ -661,7 +667,7 @@ parser.add_argument(
 
 # built-in HTTP, CGI server
 httpd_help = 'Start HTTPD server.'
-parser.add_argument(
+function.add_argument(
                     '--httpd',
                     help=httpd_help,
                     dest='httpd',
@@ -670,28 +676,28 @@ parser.add_argument(
 
 # plugin install
 install_help = 'Install a plugin (.zip)'
-parser.add_argument(
+function.add_argument(
                     '--install',
                     help=install_help,
                    )
 
 # plugin info
 info_help = 'Display files belonging to a plugin.'
-parser.add_argument(
+function.add_argument(
                     '--info',
                     help=info_help
                    )
 
 # plugin update
 update_help = 'Update a plugin by name.'
-parser.add_argument(
+function.add_argument(
                     '--update',
                     help=update_help
                    )
 
 # plugin insert
 insert_help = 'Add a series of paths to a plugin, recursively.'
-parser.add_argument(
+function.add_argument(
                     '--insert',
                     nargs='+',
                     help=insert_help
@@ -699,21 +705,21 @@ parser.add_argument(
 
 # plugin check
 check_help = 'Check a plugin before you install it!'
-parser.add_argument(
+function.add_argument(
                     '--check',
                     help=check_help
                    )
 
 # plugin remove
 delete_help = 'Delete a plugin (by name)'
-parser.add_argument(
+function.add_argument(
                     '--delete',
                     help=delete_help,
                    )
 
 # plugin list
 list_help = 'List installed plugins'
-parser.add_argument(
+function.add_argument(
                     '--list',
                     help=list_help,
                     dest='list',
@@ -722,7 +728,7 @@ parser.add_argument(
 
 # backup
 backup_help = 'Backup defined Sakura directories.'
-parser.add_argument(
+function.add_argument(
                     '--backup',
                     help=backup_help,
                     dest='backup',
@@ -730,7 +736,7 @@ parser.add_argument(
                    )
 
 # add --restore
-args = parser.parse_args()
+args = function.parse_args()
 
 if args.setup:
     setup()
@@ -755,5 +761,5 @@ elif args.httpd:
 elif args.backup:
     backup()
 else:
-    parser.print_help()
+    function.print_help()
 

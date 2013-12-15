@@ -49,3 +49,4 @@ SETTINGS = ini('settings')
 
 if SETTINGS['directories']['basehref'] == 'scriptpath':
     SETTINGS['directories']['basehref'] = os.path.abspath(inspect.getfile(inspect.currentframe())).rsplit('/', 1)[0] + '/' + SETTINGS['directories']['cache'] + '/'
+

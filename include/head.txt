@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>%%var title%% @ Stathode</title>
+<base href="%%func config directories basehref%%">
+<link href="resources/style.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+
+<header id="mast" class="gradient-gray">
+    <div class="center-width">
+        <h1><a href="index.html">Stathode</a></h1>
+
+        <nav id="navigation">
+            <ul>
+             <li><a href="index.html">Home</a>
+             <li><a href="portfolio/index.html">Portfolio</a>
+             <li><a href="hosting/index.html">Hosting</a>
+             <li><a href="development/index.html">Development</a>
+             <li><a href="blog/index.html">Blog</a>
+             <li><a href="contact.html">Contact</a>
+            </ul>
+        </nav>
+
+        %%func nav-active navigation%%
+    </div>
+</header>
+
+<div id="page" class="center-width border-shadow">
+
+%%inc sidebar.txt%%
+
+<article>
