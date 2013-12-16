@@ -1,4 +1,4 @@
-from sakura import lib
+from sakura import common
 from cStringIO import StringIO
 from lxml import etree
 from page_meta import page_meta
@@ -21,7 +21,7 @@ def blog_index(document_path):
 
     document_directory, __ = document_path.rsplit('/', 1)
     contents = StringIO()  # being replaced
-    index_d = lib.index(document_directory)
+    index_d = common.index(document_directory)
     truncate = 50
     permalink = '<h3><a href="%s">%s</a></h3>'
 

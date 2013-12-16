@@ -1,4 +1,4 @@
-from sakura import lib
+from sakura import common
 
 
 CONFIG = {
@@ -9,5 +9,5 @@ CONFIG = {
 
 
 def config_lookup(document, replace, section, key):
-    return document.replace(replace, lib.SETTINGS[section][key])
+    return document.replace(replace, common.SETTINGS[section][key])
 

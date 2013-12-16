@@ -1,4 +1,4 @@
-from sakura.lib import ini
+from sakura.common import ini
 
 
 CONFIG = {
