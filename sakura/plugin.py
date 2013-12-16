@@ -9,7 +9,7 @@ import hashlib
 import common as lib
 
 
-def plugin_remote_install(path):
+def remote_install(path):
     # get file, put locally, set path
     plugin_install(path)
 
@@ -30,7 +30,6 @@ def sanity_check(path):
 
     """
 
-
     zip_file = ZipFile(path, 'r')
     zip_index = zip_file_index(zip_file)
     zip_file.close()
@@ -48,7 +47,7 @@ def sanity_check(path):
         yield (path, error)
 
 
-def plugin_check(path):
+def check(path):
     """Used to check a plugin before installing.
     
     Assure all files extract to any subdirectories of a sakura system
@@ -81,7 +80,7 @@ def file_checksum(path):
         return hashlib.sha256(f.read()).hexdigest()
 
 
-def plugin_insert(plugin_path, *paths):
+def insert(plugin_path, *paths):
     """Add a series of paths (directories) to a plugin, recursively."""
     
     zip_file = ZipFile(plugin_path, 'a')
@@ -104,7 +103,7 @@ def plugin_insert(plugin_path, *paths):
     return None
 
 
-def plugin_install(path, update=False):
+def install(path, update=False):
     """Plugin zip-extraction protocol."""
 
     # sanity check
@@ -238,7 +237,7 @@ def plugin_install(path, update=False):
     return True
 
 
-def plugin_list():
+def display_installed():
     """Display installed plugin information."""
     
     conn = sqlite3.connect('sakura.db')
@@ -255,7 +254,7 @@ def plugin_list():
         print
 
 
-def plugin_delete(name):
+def delete(name):
     """Delete file paths associated with plugin."""
 
     conn = sqlite3.connect('sakura.db')
@@ -317,13 +316,13 @@ def plugin_delete(name):
     return None
 
 
-def plugin_error(plugin):
+def error(plugin):
     """This sucks. Should have proper exception?."""
     print 'no such plugin "%s" installed' % plugin
     sys.exit(1)
 
 
-def plugin_info(plugin):
+def info(plugin):
     """Display files installed by "plugin."
     
     Should also print plugin_meta data.

@@ -40,9 +40,9 @@ function.add_argument(
 # plugin install
 install_help = 'Install a plugin (.zip)'
 function.add_argument(
-                    '--install',
-                    help=install_help,
-                   )
+                      '--install',
+                      help=install_help,
+                     )
 
 # plugin info
 info_help = 'Display files belonging to a plugin.'
@@ -104,21 +104,21 @@ args = function.parse_args()
 if args.setup:
     setup()
 elif args.install:
-    sakura.plugin_install(args.install)
+    sakura.plugin.install(args.install)
 elif args.update:
-    sakura.plugin_install(args.update, update=True)
+    sakura.plugin.install(args.update, update=True)
 elif args.info:
-    sakura.plugin_info(args.info)
+    sakura.plugin.info(args.info)
 elif args.delete:
-    sakura.plugin_delete(args.delete)
+    sakura.plugin.delete(args.delete)
 elif args.insert:
-    sakura.plugin_insert(*args.insert)
+    sakura.plugin.insert(*args.insert)
 elif args.check:
-    sakura.plugin_check(args.check)
+    sakura.plugin.check(args.check)
 elif args.refresh:
     sakura.cache()
 elif args.list:
-    sakura.plugin_list()
+    sakura.plugin.display_installed()
 elif args.httpd:
     sakura.httpd()
 elif args.backup:

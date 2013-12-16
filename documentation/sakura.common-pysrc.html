@@ -27,7 +27,12 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://127.0.0.1/">Sakura CMS</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table width="100%" cellpadding="0" cellspacing="0">
@@ -41,8 +46,6 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
-        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
-    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="sakura.common-pysrc.html"
@@ -96,8 +99,7 @@
 <a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
 <a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
 <a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line"> </tt>
-<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">    <tt class="py-name">settings</tt> <tt class="py-op">=</tt> <tt id="link-0" class="py-name" targets="Function sakura.common.ini()=sakura.common-module.html#ini,Function sakura.lib.ini()=sakura.lib-module.html#ini"><a title="sakura.common.ini
-sakura.lib.ini" class="py-name" href="#" onclick="return doclink('link-0', 'ini', 'link-0');">ini</a></tt><tt class="py-op">(</tt><tt class="py-string">'settings'</tt><tt class="py-op">)</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">    <tt class="py-name">settings</tt> <tt class="py-op">=</tt> <tt id="link-0" class="py-name" targets="Function sakura.common.ini()=sakura.common-module.html#ini"><a title="sakura.common.ini" class="py-name" href="#" onclick="return doclink('link-0', 'ini', 'link-0');">ini</a></tt><tt class="py-op">(</tt><tt class="py-string">'settings'</tt><tt class="py-op">)</tt> </tt>
 <a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line">    <tt class="py-name">directory</tt> <tt class="py-op">=</tt> <tt class="py-name">directory</tt> <tt class="py-keyword">or</tt> <tt class="py-name">settings</tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'content'</tt><tt class="py-op">]</tt> </tt>
 <a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line">    <tt class="py-name">index_d</tt> <tt class="py-op">=</tt> <tt class="py-name">OrderedDict</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
 <a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line"> </tt>
@@ -107,15 +109,10 @@ sakura.lib.ini" class="py-name" href="#" onclick="return doclink('link-0', 'ini'
 <a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">index_d</tt> </tt>
 </div><a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line"> </tt>
 <a name="L53"></a><tt class="py-lineno">53</tt>  <tt class="py-line"> </tt>
-<a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line"><tt id="link-1" class="py-name" targets="Variable sakura.common.SETTINGS=sakura.common-module.html#SETTINGS,Variable sakura.lib.SETTINGS=sakura.lib-module.html#SETTINGS"><a title="sakura.common.SETTINGS
-sakura.lib.SETTINGS" class="py-name" href="#" onclick="return doclink('link-1', 'SETTINGS', 'link-1');">SETTINGS</a></tt> <tt class="py-op">=</tt> <tt id="link-2" class="py-name"><a title="sakura.common.ini
-sakura.lib.ini" class="py-name" href="#" onclick="return doclink('link-2', 'ini', 'link-0');">ini</a></tt><tt class="py-op">(</tt><tt class="py-string">'settings'</tt><tt class="py-op">)</tt> </tt>
+<a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line"><tt id="link-1" class="py-name" targets="Variable sakura.common.SETTINGS=sakura.common-module.html#SETTINGS"><a title="sakura.common.SETTINGS" class="py-name" href="#" onclick="return doclink('link-1', 'SETTINGS', 'link-1');">SETTINGS</a></tt> <tt class="py-op">=</tt> <tt id="link-2" class="py-name"><a title="sakura.common.ini" class="py-name" href="#" onclick="return doclink('link-2', 'ini', 'link-0');">ini</a></tt><tt class="py-op">(</tt><tt class="py-string">'settings'</tt><tt class="py-op">)</tt> </tt>
 <a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line"> </tt>
-<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line"><tt class="py-keyword">if</tt> <tt id="link-3" class="py-name"><a title="sakura.common.SETTINGS
-sakura.lib.SETTINGS" class="py-name" href="#" onclick="return doclink('link-3', 'SETTINGS', 'link-1');">SETTINGS</a></tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'basehref'</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-string">'scriptpath'</tt><tt class="py-op">:</tt> </tt>
-<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">    <tt id="link-4" class="py-name"><a title="sakura.common.SETTINGS
-sakura.lib.SETTINGS" class="py-name" href="#" onclick="return doclink('link-4', 'SETTINGS', 'link-1');">SETTINGS</a></tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'basehref'</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">abspath</tt><tt class="py-op">(</tt><tt class="py-name">inspect</tt><tt class="py-op">.</tt><tt class="py-name">getfile</tt><tt class="py-op">(</tt><tt class="py-name">inspect</tt><tt class="py-op">.</tt><tt class="py-name">currentframe</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">rsplit</tt><tt class="py-op">(</tt><tt class="py-string">'/'</tt><tt class="py-op">,</tt> <tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">+</tt> <tt class="py-string">'/'</tt> <tt class="py-op">+</tt> <tt id="link-5" class="py-name"><a title="sakura.common.SETTINGS
-sakura.lib.SETTINGS" class="py-name" href="#" onclick="return doclink('link-5', 'SETTINGS', 'link-1');">SETTINGS</a></tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'cache'</tt><tt class="py-op">]</tt> <tt class="py-op">+</tt> <tt class="py-string">'/'</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line"><tt class="py-keyword">if</tt> <tt id="link-3" class="py-name"><a title="sakura.common.SETTINGS" class="py-name" href="#" onclick="return doclink('link-3', 'SETTINGS', 'link-1');">SETTINGS</a></tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'basehref'</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-string">'scriptpath'</tt><tt class="py-op">:</tt> </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">    <tt id="link-4" class="py-name"><a title="sakura.common.SETTINGS" class="py-name" href="#" onclick="return doclink('link-4', 'SETTINGS', 'link-1');">SETTINGS</a></tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'basehref'</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">abspath</tt><tt class="py-op">(</tt><tt class="py-name">inspect</tt><tt class="py-op">.</tt><tt class="py-name">getfile</tt><tt class="py-op">(</tt><tt class="py-name">inspect</tt><tt class="py-op">.</tt><tt class="py-name">currentframe</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">rsplit</tt><tt class="py-op">(</tt><tt class="py-string">'/'</tt><tt class="py-op">,</tt> <tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">+</tt> <tt class="py-string">'/'</tt> <tt class="py-op">+</tt> <tt id="link-5" class="py-name"><a title="sakura.common.SETTINGS" class="py-name" href="#" onclick="return doclink('link-5', 'SETTINGS', 'link-1');">SETTINGS</a></tt><tt class="py-op">[</tt><tt class="py-string">'directories'</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-string">'cache'</tt><tt class="py-op">]</tt> <tt class="py-op">+</tt> <tt class="py-string">'/'</tt> </tt>
 <a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line"> </tt><script type="text/javascript">
 <!--
 expandto(location.href);
@@ -140,13 +137,18 @@ expandto(location.href);
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://127.0.0.1/">Sakura CMS</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sun Dec 15 14:26:30 2013
+    Generated by Epydoc 3.0.1 on Sun Dec 15 18:06:19 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
