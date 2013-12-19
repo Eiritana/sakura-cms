@@ -1,5 +1,5 @@
 <aside id="sidebar">
 %%func breadcrumbs%%
-%%func table-of-contents%%
-%%func document-meta%%
+%%func table_of_contents%%
+%%func page_meta%%
 </aside>

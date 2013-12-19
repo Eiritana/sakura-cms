@@ -2,11 +2,7 @@ from sakura.common import ini
 from lxml import etree
 
 
-CONFIG = {
-          'replaces': 'nav-active',
-          'args': ['document_path', 'document'],
-          'calls': 'nav_active'
-         }
+SAKURA_ARGS = ['document_path', 'document']
 
 
 def nav_active(document_path, document, nav_id):

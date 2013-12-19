@@ -2,7 +2,7 @@
 """Sakura CLI interface"""
 
 
-from sakura import sakura
+import sakura
 import argparse
 
 
@@ -10,7 +10,7 @@ description = (
                'Sakura content management system; parses files, then "caches" '
                'them.'
               )
-function = argparse.ArgumentParser(description=description, prog='sakura')
+function = argparse.ArgumentParser(description=description, prog='sa-cli')
 
 refresh_help = 'Clear CACHE and reparse CONTENT into CACHE.'
 function.add_argument(
@@ -37,51 +37,58 @@ function.add_argument(
                     action='store_true'
                    )
 
-# plugin install
-install_help = 'Install a plugin (.zip)'
+# snapshot install
+install_help = 'Install a snapshot (.zip)'
 function.add_argument(
                       '--install',
                       help=install_help,
                      )
 
-# plugin info
-info_help = 'Display files belonging to a plugin.'
+# snapshot info
+info_help = 'Display files belonging to a snapshot.'
 function.add_argument(
                     '--info',
                     help=info_help
                    )
 
-# plugin update
-update_help = 'Update a plugin by name.'
+# snapshot update
+update_help = 'Update a snapshot by name.'
 function.add_argument(
                     '--update',
                     help=update_help
                    )
 
-# plugin insert
-insert_help = 'Add a series of paths to a plugin, recursively.'
+# snap insert
+insert_help = 'Add a series of paths to a snapshot, recursively.'
 function.add_argument(
                     '--insert',
                     nargs='+',
                     help=insert_help
                    )
 
-# plugin check
-check_help = 'Check a plugin before you install it!'
+# snapshot
+snapshot_help = 'Make a snapshot (also useful for backups'
+function.add_argument(
+                      '--snapshot',
+                      help=snapshot_help,
+                     )
+
+# snapshot check
+check_help = 'Check a snapshot before you install it!'
 function.add_argument(
                     '--check',
                     help=check_help
                    )
 
-# plugin remove
-delete_help = 'Delete a plugin (by name)'
+# snapshot remove
+delete_help = 'Delete a snapshot (by name)'
 function.add_argument(
                     '--delete',
                     help=delete_help,
                    )
 
-# plugin list
-list_help = 'List installed plugins'
+# snapshot list
+list_help = 'List installed snapshot'
 function.add_argument(
                     '--list',
                     help=list_help,
@@ -104,25 +111,27 @@ args = function.parse_args()
 if args.setup:
     setup()
 elif args.install:
-    sakura.plugin.install(args.install)
+    sakura.snapshot.install(args.install)
+elif args.snapshot:
+    sakura.snapshot.snapshot(args.snapshot)
 elif args.update:
-    sakura.plugin.install(args.update, update=True)
+    sakura.snapshot.install(args.update, update=True)
 elif args.info:
-    sakura.plugin.info(args.info)
+    sakura.snapshot.info(args.info)
 elif args.delete:
-    sakura.plugin.delete(args.delete)
+    sakura.snapshot.delete(args.delete)
 elif args.insert:
-    sakura.plugin.insert(*args.insert)
+    sakura.snapshot.insert(*args.insert)
 elif args.check:
-    sakura.plugin.check(args.check)
+    sakura.snapshot.check(args.check)
 elif args.refresh:
-    sakura.cache()
+    sakura.sakura.cache()
 elif args.list:
-    sakura.plugin.display_installed()
+    sakura.snapshot.display_installed()
 elif args.httpd:
-    sakura.httpd()
+    sakura.sakura.httpd()
 elif args.backup:
-    sakura.backup()
+    sakura.sakura.backup()
 else:
     function.print_help()
 

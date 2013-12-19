@@ -3,11 +3,7 @@ from lxml import etree
 from cStringIO import StringIO
 
 
-CONFIG = {
-          'replaces': 'table-of-contents',
-          'args': ['document_path', 'document'],
-          'calls': 'table_of_contents'
-         }
+SAKURA_ARGS = ['document_path', 'document']
 
 
 def table_of_contents(document_path, document):

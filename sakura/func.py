@@ -28,20 +28,16 @@ def load_functions(public):
         if module_name == "__init__":
             continue
 
-        # import the module...
+        # import the module and the keys/arguments
         module_import = "%s.%s" % (package, module_name)
+        args = __import__(module_import, fromlist=["SAKURA_ARGS"])
+        args = args.SAKURA_ARGS
 
-        # attempt to read and utilize the function's CONFIG settings
-        function_config = __import__(module_import, fromlist=["CONFIG"])
-        function_config = function_config.CONFIG
-        replaces = function_config['replaces']  # what text ((calls)) this function
-
-        # load pre-defined 
-        args = [public[arg] for arg in function_config['args']]
-        calls = function_config['calls']
-        func = __import__(module_import, fromlist=[calls])
-        func = getattr(func, calls)
-        functions[replaces] = (func, args)
+        # load pre-defined arguments via keys/arguments
+        args = [public[arg] for arg in args]
+        func = __import__(module_import, fromlist=[module_name])
+        func = getattr(func, module_name)
+        functions[module_name] = (func, args)
 
     return functions
 

@@ -1,11 +1,7 @@
 from sakura.common import ini
 
 
-CONFIG = {
-          'replaces': 'css',
-          'args': ['document'],
-          'calls': 'css'
-         }
+SAKURA_ARGS =  ['document']
 
 
 def css(document, css_path):

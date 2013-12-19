@@ -1,11 +1,7 @@
 from sakura.common import ini
 
 
-CONFIG = {
-          'replaces': 'breadcrumbs',
-          'args': ['document_path'],
-          'calls': 'breadcrumbs'
-         }
+SAKURA_ARGS =  ['document_path']
 
 
 def breadcrumbs(path):

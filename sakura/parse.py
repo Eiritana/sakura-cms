@@ -145,7 +145,13 @@ def parse(document_path):
                   'element_full': element['full'],
                   'element_name': element['name'],
                  }
-        function, args = func.load_functions(public)[element['name']]
+
+        try:
+            function, args = func.load_functions(public)[element['name']]
+        except KeyError:
+            error_vars = (document_path, element['name'], element['full'])
+            print '%%func%%    %s: %s is not loaded (%s)' % error_vars
+            continue
 
         # if we do have user defined arguments in the element,
         # then append them to the args!

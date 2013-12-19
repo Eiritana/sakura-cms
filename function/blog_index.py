@@ -4,11 +4,7 @@ from lxml import etree
 from page_meta import page_meta
 
 
-CONFIG = {
-          'replaces': 'blog-index',
-          'args': ['document_path'],
-          'calls': 'blog_index'
-         }
+SAKURA_ARGS =  ['document_path']
 
 
 def blog_index(document_path):

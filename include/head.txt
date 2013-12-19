@@ -22,7 +22,7 @@
             </ul>
         </nav>
 
-        %%func nav-active navigation%%
+        %%func nav_active navigation%%
     </div>
 </header>
 

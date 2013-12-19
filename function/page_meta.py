@@ -2,11 +2,7 @@ from sakura.common import ini
 import os.path, time
 
 
-CONFIG = {
-          'replaces': 'document-meta',
-          'args': ['document_path'],
-          'calls': 'page_meta'
-         }
+SAKURA_ARGS =  ['document_path']
 
 
 def page_meta(path):
