@@ -126,7 +126,7 @@ def install(path, update=False):
     """snapshot zip-extraction protocol."""
 
     # sanity check
-    sanity_check(path):
+    sanity_check(path)
 
     # now open the archive...
     zip_file = ZipFile(path, 'r')
