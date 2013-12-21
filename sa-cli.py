@@ -66,13 +66,6 @@ function.add_argument(
                     help=snapshot_help
                    )
 
-# snapshot
-snapshot_help = 'Make a snapshot (also useful for backups'
-function.add_argument(
-                      '--snapshot',
-                      help=snapshot_help,
-                     )
-
 # snapshot check
 check_help = 'Check a snapshot before you install it!'
 function.add_argument(

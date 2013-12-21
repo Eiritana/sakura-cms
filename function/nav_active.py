@@ -6,7 +6,7 @@ SAKURA_ARGS = ['document_path', 'document']
 
 
 def nav_active(document_path, document, nav_id):
-    """Inserts canonical to header, other stuff..."""
+    """Marks a link therein #nav_id, if it's the document we're parsing."""
 
     root = etree.HTML(document)
     __, document_path = document_path.split('/', 1)
