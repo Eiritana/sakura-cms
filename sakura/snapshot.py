@@ -50,6 +50,8 @@ def sanity_check(path):
 
         print 'unallowed basedir: ' + path
 
+    return None
+
 
 def check(path):
     """Used to check a snapshot before installing.
@@ -73,7 +75,6 @@ def check(path):
         print 'passed CRC and file check'
 
     sanity_check(path)
-
     return None
 
 
@@ -125,11 +126,7 @@ def install(path, update=False):
     """snapshot zip-extraction protocol."""
 
     # sanity check
-    for test_path, error in sanity_check(path):
-
-        if error:
-            print 'snapshot NOT SANE: ' + test_path
-            return None
+    sanity_check(path):
 
     # now open the archive...
     zip_file = ZipFile(path, 'r')
