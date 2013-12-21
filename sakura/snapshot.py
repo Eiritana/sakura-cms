@@ -87,7 +87,7 @@ def file_checksum(path):
         return hashlib.sha256(f.read()).hexdigest()
 
 
-def insert(snapshot_path, *paths):
+def snapshot(snapshot_path, *paths):
     """Create an arcive, consisting of specified paths. Recursive.
 
     Appends comment for zip_file, as package data
@@ -118,18 +118,6 @@ def insert(snapshot_path, *paths):
                     zip_file.write(file_path, file_path, ZIP_DEFLATED)
 
     zip_file.close()
-    return None
-
-
-def snapshot(destination):
-    """Archive the entire sakura directory, sans core files.
-    
-    Boilerplate.
-    
-    """
-
-    directories = ('content', 'config', 'function', 'include', 'cgi',) 
-    insert(destination, *directories)
     return None
 
 

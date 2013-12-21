@@ -58,12 +58,12 @@ function.add_argument(
                     help=update_help
                    )
 
-# snap insert
-insert_help = 'Add a series of paths to a snapshot, recursively.'
+# snap snapshot
+snapshot_help = 'Add a series of paths to a snapshot, recursively.'
 function.add_argument(
-                    '--insert',
+                    '--snapshot',
                     nargs='+',
-                    help=insert_help
+                    help=snapshot_help
                    )
 
 # snapshot
@@ -112,16 +112,14 @@ if args.setup:
     setup()
 elif args.install:
     sakura.snapshot.install(args.install)
-elif args.snapshot:
-    sakura.snapshot.snapshot(args.snapshot)
 elif args.update:
     sakura.snapshot.install(args.update, update=True)
 elif args.info:
     sakura.snapshot.info(args.info)
 elif args.delete:
     sakura.snapshot.delete(args.delete)
-elif args.insert:
-    sakura.snapshot.insert(*args.insert)
+elif args.snapshot:
+    sakura.snapshot.snapshot(*args.insert)
 elif args.check:
     sakura.snapshot.check(args.check)
 elif args.refresh:

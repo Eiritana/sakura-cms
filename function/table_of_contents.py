@@ -28,6 +28,7 @@ def table_of_contents(document_path, document):
     html.write(table_settings['container']['open_tag'])
     __, document_path = document_path.split('/', 1)
     number_of_entries = 0
+    has_nested = False
 
     for element in root.iter():
         tag = element.tag
@@ -50,11 +51,12 @@ def table_of_contents(document_path, document):
         elif nest_level > current_level:
             html.write('\n<ol>\n <li>%s' % entry)
         elif nest_level < current_level:
+            has_nested = True
             html.write('</ol>\n <li>%s' % entry)
 
         current_level = nest_level
 
-    if number_of_entries < 2:
+    if number_of_entries < 2 or not has_nested:
         return ''
 
     html.write('\n</ol>')
