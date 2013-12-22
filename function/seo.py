@@ -1,28 +1,16 @@
-from sakura.common import ini
+from sakura.common import SETTINGS
 from lxml import etree
 
 
 SAKURA_ARGS = ['document_path', 'document']
 
 
-def nav_active(document_path, document, nav_id):
+def seo(document_path, document):
     """Inserts canonical to header, other stuff..."""
 
-    root = etree.HTML(document)
-    __, document_path = document_path.split('/', 1)
-
-    for element in root.iter('nav'):
-
-        for link in element.iter('a'):
-            href = link.attrib['href']
-
-            if href == 'index.html':
-                pass
-            elif href[-10:] == 'index.html':
-                href = href.replace('index.html', '')
-
-            if document_path.startswith(href):
-                link.attrib['id'] = 'active'
-
-    return etree.tostring(root, pretty_print=True)
+    basehref = SETTINGS['httpd']['basehref']
+    href = basehref + document_path
+    canonical = '<link rel="canonical" href="%s" />' % href
+    #raise Exception(document.replace('</head>', canonical + '\n</head>'))
+    return document.replace('</head>', canonical + '\n</head>')
 

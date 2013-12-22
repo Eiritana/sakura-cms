@@ -43,7 +43,6 @@ def cache():
     cache_dir = lib.SETTINGS['directories']['cache']
 
     for directory_path, file_names in lib.index().items():
-
         directories = directory_path.split('/')[1:]
 
         # keep trailing slash!
@@ -58,10 +57,48 @@ def cache():
         for file_name in file_names:
             file_path = directory_path + '/' + file_name
             cached_file_path = new_directory + file_name
-            cached_file = parse.parse(file_path)
+
+            if file_name == '_cache':
+                # in the future this will be for exceptions for file names
+                # and file types we want to skip parsing and just copy over
+
+                with open(file_path) as f:
+                    cached_contents = f.read()
+            else:
+                # parse!
+                cached_contents = parse.parse(file_path)
+
+            with open(cached_file_path, 'w') as f:
+                f.write(cached_contents)
+
+    recache()
+    return None
+
+
+def recache():
+    """Finally, go over the cached/refreshed contents therein the cache
+    directory and apply functions to each.
+    
+    """
+
+    cache_dir = lib.SETTINGS['directories']['cache']
+
+    for directory_path, file_names in lib.index(cache_dir).items():
+        directories = directory_path.split('/')[1:]
+        new_directory = cache_dir + '/'
+
+        if len(directories) > 0:
+            new_directory += '/'.join(directories) + '/'
+
+        for file_name in file_names:
+            file_path = directory_path + '/' + file_name
+            cached_file_path = new_directory + file_name
+            cached_file = parse.parse_cache(file_path)
 
             with open(cached_file_path, 'w') as f:
                 f.write(cached_file)
+
+    return None
 
 
 def setup():

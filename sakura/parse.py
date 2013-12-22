@@ -1,5 +1,8 @@
 """Tools for parsing a document.
 
+Notes: just like the element dictionary I should have a document dictionary,
+which includes document and document path.
+
 """
 
 
@@ -70,40 +73,114 @@ def minify(document_path, document):
     return document
 
 
-def include(document, include_directory):
+def include(document):
     """Replaces instances of %%inc *.*%% with the contents of a plaintext file.
     
     Example: %%inc foo.txt%% would be replaced by the file contents of
     include/foo.txt.
     
-    document (str) -- document being parsed
-    include_directory (str) -- this is just the include directory
+    document (dict) -- document dictionary for the document being parsed
     
     """
+    
+    contents = document['contents']
 
-    # full element, element contents, and element name!
-    for element in iter_tags('inc', document):
-        include_tag = element['name']
-        path = include_directory + '/' + include_tag
+    # while includes still exist, call them!
+    # this solves the problem of having an include in an include.
+    include_directory = lib.SETTINGS['directories']['include']
 
-        # retrieve file specified in %%inc%% call
-        with open(path) as f:
-            include = f.read().strip()
+    while tag_type_exists('inc', contents):
+        # full element, element contents, and element name!
+        for element in iter_tags('inc', contents):
+            include_tag = element['name']
+            path = include_directory + '/' + include_tag
 
-        # use attributes as replacements; %%substitutions%%
-        attribute_pattern = (
-                             """(\S+)=["']?((?:.(?!["']?\s+"""
-                             """(?:\S+)=|[>"']))+.)["']?"""
-                            )
+            # retrieve file specified in %%inc%% call
+            with open(path) as f:
+                include = f.read().strip()
 
-        for match in re.finditer(attribute_pattern, element['full']):
-            value = match.group(2)
-            key = '%%var ' + match.group(1) + '%%'
-            include = include.replace(key, value)
+            # use attributes as replacements; %%substitutions%%
+            # reading aloud will summon cthulu, etc.
+            attribute_pattern = (
+                                 """(\S+)=["']?((?:.(?!["']?\s+"""
+                                 """(?:\S+)=|[>"']))+.)["']?"""
+                                )
 
-        document = document.replace(element['full'], include)
+            for match in re.finditer(attribute_pattern, element['full']):
+                value = match.group(2)
+                key = '%%var ' + match.group(1) + '%%'
+                include = include.replace(key, value)
 
-    return document
+            contents = contents.replace(element['full'], include)
+
+    return contents
+
+
+def replace_functions(document):
+    """Replace Sakura functions %%func function-name args%%.
+
+    document (dict) -- the document being evaluated to find the functions
+    edit (str) -- the document to place the evaluation of the function in.
+
+    Used for parsing the function list _cache, which specified functions to
+    use on every document therein cache.
+
+    """
+
+    contents = document['contents']
+    document_path = document['path']
+    edit_contents = document.get('edit_contents', None)
+    new_contents = edit_contents or contents
+
+    # replace ((functions)) -- importantly last
+    for element in iter_tags('func', contents):
+        new_contents = evaluate_function(
+                                         element,
+                                         new_contents,
+                                         document_path,
+                                         debug=edit_contents
+                                        )
+
+    return new_contents
+
+
+def evaluate_function(element, contents, document_path, debug=False):
+    """Take a given Sakura %%func%% element, and return the contents
+    of said evaluation.
+    
+    element (dict) -- the dictionary generated from iter_tags().
+    document (str) -- the document to edit with the element evaluation
+
+    """
+
+    user_defined_args = get_args(element['contents'])
+    public = {  # room for elaboration on this...
+              'document_path': document_path,
+              'document': contents,
+              'element_full': element['full'],
+              'element_name': element['name'],
+             }
+
+    try:
+        function, args = func.load_functions(public)[element['name']]
+    except KeyError:
+        error_vars = (document_path, element['name'], element['full'])
+        raise Exception('%%func%%    %s: %s is not loaded (%s)' % error_vars)
+
+    # if we do have user defined arguments in the element,
+    # then append them to the args!
+    if user_defined_args:
+        args.extend(user_defined_args)
+
+    data = function(*args)
+
+    if debug:
+        return data
+
+    if user_defined_args:
+        return data.replace(element['full'], '')
+    else:
+        return contents.replace(element['full'], data)
 
 
 def parse(document_path):
@@ -111,62 +188,70 @@ def parse(document_path):
     
     Parse a document in CONTENT; then parse named variables
     sent to that include, if available.
+    
+    A document dictionary is generated and passed around quite a bit from
+    here out.
 
     document_path (str) -- path of file being parsed
     
     """
 
-    include_directory = lib.SETTINGS['directories']['include']
-
     # the primary document content
-    with open(document_path) as f:
-        document = f.read().strip()
+    document = {'path': document_path}
 
-    # while includes still exist, call them!
-    # this solves the problem of having an include in an include.
-    while tag_type_exists('inc', document):
-        document = include(document, include_directory)
+    with open(document['path']) as f:
+        document['contents'] = f.read().strip()
+
+    document['contents'] = include(document)
 
     # replace ((functions)) -- importantly last
-    for element in iter_tags('func', document):
-
-        # we need to test for existing args
-        if ' ' in element['contents']:
-            __, args = element['contents'].split(' ', 1)
-            user_defined_args = args.split(' ')
-
-        else:
-            user_defined_args = None
-
-        # room for elaboration on this...
-        public = {
-                  'document_path': document_path,
-                  'document': document,
-                  'element_full': element['full'],
-                  'element_name': element['name'],
-                 }
-
-        try:
-            function, args = func.load_functions(public)[element['name']]
-        except KeyError:
-            error_vars = (document_path, element['name'], element['full'])
-            print '%%func%%    %s: %s is not loaded (%s)' % error_vars
-            continue
-
-        # if we do have user defined arguments in the element,
-        # then append them to the args!
-        if user_defined_args:
-            args.extend(user_defined_args)
-
-        data = function(*args)
-
-        if user_defined_args:
-            document = data.replace(element['full'], '')
-        else:
-            document = document.replace(element['full'], data)
+    document = replace_functions(document)
 
     if lib.SETTINGS['parser']['minify'] == 'yes':
         document = minify(document_path, document)
 
     return document
+
+
+def get_args(contents):
+    """Return a list of arguments therein the contents of a Sakura element.
+    
+    If there are no arguments, returns None.
+    
+    contents (str) -- example: "func config httpd basehref"
+
+    """
+
+    if ' ' in contents:
+        # first arg is always the type of tag, e.g., func, inc
+        __, args = contents.split(' ', 1)
+        return args.split(' ')
+
+    else:
+        return None
+
+
+def parse_cache(document_path):
+    """Parse the cached document with a sakura function.
+
+    document_path (str) -- path of file being parsed
+    
+    Has a hardcoded value, bad!
+
+    """
+
+    function_list = 'cache/_cache'
+    
+    with open(function_list) as f:
+        function_list = f.read()
+
+    with open(document_path) as f:
+        edit_contents = f.read()
+
+    document = {
+                'contents': function_list,
+                'edit_contents': edit_contents,
+                'path': document_path
+               }
+    return replace_functions(document)
 

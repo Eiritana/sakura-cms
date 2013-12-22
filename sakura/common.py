@@ -51,6 +51,7 @@ def index(directory=None):
     return index_d
 
 
+# make this get_settings()
 SETTINGS = ini('settings')
 
 if SETTINGS['directories']['basehref'] == 'scriptpath':
