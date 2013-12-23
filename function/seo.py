@@ -1,3 +1,10 @@
+"""Use to go over cache and "optimize" files for search engines, as well
+as speed in general.
+
+  * inserts canonical links in headers
+
+"""
+
 from sakura.common import SETTINGS
 from lxml import etree
 

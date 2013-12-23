@@ -1,3 +1,9 @@
+"""Generate HTML which states the time which the document was modified and
+created.
+
+"""
+
+
 from sakura.common import ini
 import os.path, time
 

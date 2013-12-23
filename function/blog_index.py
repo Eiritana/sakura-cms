@@ -1,3 +1,9 @@
+"""blog index globs current directory to list snippets of each
+article therein.
+
+"""
+
+
 from sakura import common
 from cStringIO import StringIO
 from lxml import etree
@@ -8,13 +14,6 @@ SAKURA_ARGS =  ['document_path']
 
 
 def blog_index(document_path):
-    """((blog-index)) globs current directory to list snippets of each
-    article therein.
-
-    Includes links!
-
-    """
-
     document_directory, __ = document_path.rsplit('/', 1)
     contents = StringIO()  # being replaced
     index_d = common.index(document_directory)

@@ -1,3 +1,13 @@
+"""Do a lookup in the SETTINGS global.
+
+{{func config httpd basehref}}
+
+Will output the basehref defined in the [httpd] section of the
+config/settings.ini file.
+
+"""
+
+
 from sakura import common
 
 

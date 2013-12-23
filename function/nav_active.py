@@ -1,3 +1,9 @@
+"""Sets link's ID as "active", if it's within the specified navigation ID and
+it's href matches the current document's being parsed.
+
+"""
+
+
 from sakura.common import ini
 from bs4 import BeautifulSoup
 import os

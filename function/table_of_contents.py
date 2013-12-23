@@ -1,3 +1,15 @@
+"""Generate a table of contents for an HTML page.
+
+Headings are indexed and placed into nested ordered lists.
+
+For a table of contents to be generated, there must be at least two top-level
+headings and one subheading belonging to either top-level heading.
+
+If a heading has an ID, that ID will be used to generate a link in the
+table of contents.
+
+"""
+
 from sakura.common import ini
 from lxml import etree
 from cStringIO import StringIO
@@ -7,9 +19,7 @@ SAKURA_ARGS = ['document_path', 'document']
 
 
 def table_of_contents(document_path, document):
-    """Maybe instead of StringIO I should build with lxml?
-
-    """
+    """Maybe instead of StringIO I should build with lxml?"""
 
     table_settings = ini('table-of-contents')
     root = etree.HTML(document)  # can define base_url!

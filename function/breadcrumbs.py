@@ -1,3 +1,11 @@
+"""Divides the directories in given path into a hierarchical series of
+links, like so:
+
+Home > Portfolio > Guy Normal
+
+"""
+
+
 from sakura.common import ini
 
 
@@ -5,8 +13,6 @@ SAKURA_ARGS =  ['document_path']
 
 
 def breadcrumbs(path):
-    """A piece function, which generates breadcrumbs."""
-
     bcrumbs_settings = ini('breadcrumbs')['general']
     crumbs = path.split('/')
     del crumbs[0]  # this would be the content directory
