@@ -112,7 +112,7 @@ elif args.info:
 elif args.delete:
     sakura.snapshot.delete(args.delete)
 elif args.snapshot:
-    sakura.snapshot.snapshot(*args.insert)
+    sakura.snapshot.snapshot(*args.snapshot)
 elif args.check:
     sakura.snapshot.check(args.check)
 elif args.refresh:
