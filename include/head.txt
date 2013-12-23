@@ -21,8 +21,6 @@
              <li><a href="contact.html">Contact</a>
             </ul>
         </nav>
-
-        %%func nav_active navigation%%
     </div>
 </header>
 
