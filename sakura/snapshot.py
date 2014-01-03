@@ -134,7 +134,7 @@ def install(path, update=False):
     zip_file_name = path.rsplit('/', 1)[-1].replace('.zip', '')
 
     # setup database connection
-    conn = sqlite3.connect('sakura.db')
+    conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
 
     # assure snapshot_files table exists...
@@ -255,7 +255,7 @@ def install(path, update=False):
 def display_installed():
     """Display installed snapshot information."""
     
-    conn = sqlite3.connect('sakura.db')
+    conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
     sql = 'SELECT * FROM snapshot_meta'
     cursor.execute(sql)
@@ -272,7 +272,7 @@ def display_installed():
 def delete(name):
     """Delete file paths associated with snapshot."""
 
-    conn = sqlite3.connect('sakura.db')
+    conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
     sql = 'SELECT path FROM snapshot_files WHERE snapshot=?'
     cursor.execute(sql, (name,))
@@ -283,7 +283,7 @@ def delete(name):
         snapshot_error(name)
 
     # delete paths
-    conn = sqlite3.connect('sakura.db')
+    conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
 
     for path in paths:
@@ -344,7 +344,7 @@ def info(snapshot):
 
     """
 
-    conn = sqlite3.connect('sakura.db')
+    conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
     sql = 'SELECT path FROM snapshot_files WHERE snapshot=?'
     cursor.execute(sql, (snapshot,))

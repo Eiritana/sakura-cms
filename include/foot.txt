@@ -1,7 +1,7 @@
 </article>
 </div>
 
-<footer class="center-width border-shadow">
+<footer class="center-width" id="footer">
  <p>Footer links</p>
 </footer>
 

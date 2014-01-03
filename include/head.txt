@@ -9,10 +9,10 @@
 
 <header id="mast" class="gradient-gray">
     <div class="center-width">
-        <h1><a href="index.html">Stathode</a></h1>
+        <h1 id="mast-title"><a href="index.html">Stathode</a></h1>
 
-        <nav id="navigation">
-            <ul>
+        <nav id="mast-navigation">
+            <ul id="mast-navigation-links">
              <li><a href="index.html">Home</a>
              <li><a href="portfolio/index.html">Portfolio</a>
              <li><a href="hosting/index.html">Hosting</a>
@@ -24,8 +24,8 @@
     </div>
 </header>
 
-<div id="page" class="center-width border-shadow">
+<div id="page" class="center-width">
 
 %%inc sidebar.txt%%
 
-<article>
+<article id="page-article">

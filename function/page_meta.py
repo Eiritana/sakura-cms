@@ -21,7 +21,7 @@ def page_meta(path):
             '\n<strong>Created:</strong> %s'
             % (modified, created)
            )
-    meta_settings = ini('document-meta')['general']
+    meta_settings = ini('page_meta')['general']
     open_tag = meta_settings['open_tag']
     close_tag = meta_settings['close_tag']
     return open_tag + meta + close_tag

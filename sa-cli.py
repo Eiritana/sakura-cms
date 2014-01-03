@@ -103,26 +103,34 @@ args = function.parse_args()
 
 if args.setup:
     setup()
-elif args.install:
+
+if args.install:
     sakura.snapshot.install(args.install)
-elif args.update:
+
+if args.update:
     sakura.snapshot.install(args.update, update=True)
-elif args.info:
+
+if args.info:
     sakura.snapshot.info(args.info)
-elif args.delete:
+
+if args.delete:
     sakura.snapshot.delete(args.delete)
-elif args.snapshot:
+
+if args.snapshot:
     sakura.snapshot.snapshot(*args.snapshot)
-elif args.check:
+
+if args.check:
     sakura.snapshot.check(args.check)
-elif args.refresh:
+
+if args.refresh:
     sakura.sakura.cache()
-elif args.list:
+
+if args.list:
     sakura.snapshot.display_installed()
-elif args.httpd:
+
+if args.httpd:
     sakura.sakura.httpd()
-elif args.backup:
+
+if args.backup:
     sakura.sakura.backup()
-else:
-    function.print_help()
 
