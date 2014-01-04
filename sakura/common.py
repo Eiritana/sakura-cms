@@ -13,9 +13,6 @@ import inspect
 def ini(path):
     """Loads an INI file into a dictionary.
 
-    Takes care of determining datatypes for you, in this order of
-    precedence: float, integer, boolean, string.
-
     Args:
       path (str): the filename/path of the .ini config file to read,
         relative to config/.
