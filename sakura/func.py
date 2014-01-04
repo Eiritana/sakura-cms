@@ -15,11 +15,16 @@ def load_functions(public):
     Load functions to evaluate arguments/values pre-defined in "public"
     (dictionary).
 
-    public (dict) -- Keyword arguments any function may select from by key.
+    Args:
+      public (dict): Keyword arguments any function may select from by key.
+
+    Returns:
+        WILL ELABORATE LATER...
 
     """
 
-    package = lib.SETTINGS['directories']['function']
+    settings = lib.ini('settings')
+    package = settings['directories']['function']
     functions = {}
 
     for file_name in glob(package + '/*.py'):

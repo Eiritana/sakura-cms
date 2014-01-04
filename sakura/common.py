@@ -11,7 +11,18 @@ import inspect
 
 
 def ini(path):
-    """Loads an INI file into a dictionary."""
+    """Loads an INI file into a dictionary.
+
+    Args:
+      path (str): the filename/path of the .ini config file to read,
+        relative to config/.
+
+    Returns:
+      dict: nested-dictionary representation of an INI file.
+        Top-level keys being sections, nested dictionary being
+        the actual key=value pairs.
+
+    """
 
     parsed_config = {}
 
@@ -36,9 +47,16 @@ def ini(path):
 def index(directory=None):
     """Create an index of directories and files.
     
-    Returns a dictionary, where the key is the dirpath and the value is a
-    tuple of files.
-    
+    Returns a dictionary, where the key is the dirpath and the value is
+    a tuple of files.
+
+    Args:
+      directory (str, optional): the directory (and its contents)
+        to index; the path. Defaults to the content directory.
+
+    Returns:
+      dict: { 'content/resources/': ('file.txt', 'derp.txt', 'foo.html') }
+
     """
 
     settings = ini('settings')
@@ -49,11 +67,4 @@ def index(directory=None):
         index_d[dirpath] = filenames
 
     return index_d
-
-
-# make this get_settings()
-SETTINGS = ini('settings')
-
-if SETTINGS['directories']['basehref'] == 'scriptpath':
-    SETTINGS['directories']['basehref'] = os.path.abspath(inspect.getfile(inspect.currentframe())).rsplit('/', 1)[0] + '/' + SETTINGS['directories']['cache'] + '/'
 

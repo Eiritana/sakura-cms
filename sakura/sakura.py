@@ -18,15 +18,17 @@ def flush_cache():
 
     """
 
-    try:
-        cache_directory = lib.SETTINGS['directories']['cache']
+    settings = lib.ini('settings')
 
-        if lib.SETTINGS['backups']['before_cache'] == 'yes':
+    try:
+        cache_directory = settings['directories']['cache']
+
+        if settings['backups']['before_cache'] == 'yes':
             backup()
 
         shutil.rmtree(cache_directory)
 
-    except:
+    except:  # this is friggin' awful; except what?!
         pass
 
     os.mkdir(cache_directory)
@@ -39,8 +41,9 @@ def cache():
     """
 
     flush_cache()
-    content_dir = lib.SETTINGS['directories']['content']
-    cache_dir = lib.SETTINGS['directories']['cache']
+    settings = lib.ini('settings')
+    content_dir = settings['directories']['content']
+    cache_dir = settings['directories']['cache']
 
     for directory_path, file_names in lib.index().items():
         directories = directory_path.split('/')[1:]
@@ -81,7 +84,8 @@ def recache():
     
     """
 
-    cache_dir = lib.SETTINGS['directories']['cache']
+    settings = lib.ini('settings')
+    cache_dir = settings['directories']['cache']
 
     for directory_path, file_names in lib.index(cache_dir).items():
         directories = directory_path.split('/')[1:]
@@ -107,7 +111,9 @@ def setup():
 
     """
 
-    for directory_type, directory_path in lib.SETTINGS['directories'].items():
+    settings = lib.ini('settings')
+
+    for directory_type, directory_path in settings['directories'].items():
 
         try:
             os.mkdir(directory_path)
@@ -119,13 +125,14 @@ def setup():
 def backup():
     """Zip the config and content directories into a backup/date folder"""
 
-    backup_directory = lib.SETTINGS['directories']['backups']
+    settings = lib.ini('settings')
+    backup_directory = settings['directories']['backups']
     date_time = datetime.now().isoformat()
     backup_directory += '/' + date_time + '/'
     os.mkdir(backup_directory)
 
     # get the directories to backup, plus a setting
-    backup_conf = lib.SETTINGS['backups'].copy()
+    backup_conf = settings['backups'].copy()
     backup_conf.pop('before_cache')  # not a directory to backup!
 
     # make specified backups
@@ -151,8 +158,9 @@ def httpd():
 
     """
 
-    address = lib.SETTINGS['httpd']['address']
-    port = int(lib.SETTINGS['httpd']['port'])
+    settings = lib.ini('settings')
+    address = settings['httpd']['address']
+    port = int(settings['httpd']['port'])
     handler = CGIHTTPServer.CGIHTTPRequestHandler
     handler.cgi_directories = ['/cgi']
     server = ThreadingCGIServer((address, port), handler)

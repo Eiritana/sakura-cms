@@ -15,8 +15,14 @@ import func
 def iter_tags(tag, document):
     """Yields a dictionary of data for the current "tag" in iteration.
 
-    tag (str) -- the name of the element. %%tag%%
-    document (str) -- iterate tag in this document
+    Args:
+      tag (str): the name of the element. %%tag%%
+      document (str): iterate tag in this document
+
+    Yields:
+      dict: "full" tag being substituted (%%func blah blah%%),
+      the "contents" of said tag (func blah blah), and the "name" of
+      the tag (func).
 
     >>> document = '%%func foo%% %%var bar%% %%inc foo.txt%% %%func bar%%'
     >>> [element['name'] for element in iter_tags('func', document)]
@@ -40,16 +46,20 @@ def iter_tags(tag, document):
 
 def tag_type_exists(tag, document):
     """Return True if tags with bracket types exist, else false.
-    
-    tag (str) -- the kind of %%tag%% to search for
-    document (str) -- the document to search in
-    
+
+    Args:
+      tag (str) -- the kind of %%tag%% to search for
+      document (str) -- the document to search in
+
+    Returns:
+      bool: True if Sakura tags are present in string, False otherwise.
+
     >>> document = 'blah %%inc foo.txt%% blah blah %%func bar%%'
     >>> tag_type_exists('func', document)
     True
     >>> tag_type_exists('var', document)
     False
-    
+
     """
 
     pattern = '%%' + tag + ' (.*)%%'
@@ -58,9 +68,20 @@ def tag_type_exists(tag, document):
 
 def minify(document_path, document):
     """Compress CSS and HTML mostly by removing whitespace.
-    
-    Not sure if it should be a %%func%%.
-    
+
+    Args:
+      document_path (str): path to file to be "minimized"
+      document (str): the contents of said document
+
+    Returns:
+      str: whitespace-reduced version of the document arg.
+
+    Notes:
+      Not sure if it should be a %%func%% for _cache.
+
+    >>> minify('foo.html', '  what   ')
+    'what '
+
     """
 
     __, file_extension = os.path.splitext(document_path)
@@ -74,22 +95,31 @@ def minify(document_path, document):
 
 
 def include(document):
-    """Replaces instances of %%inc *.*%% with the contents of a plaintext file.
-    
-    Example: %%inc foo.txt%% would be replaced by the file contents of
-    include/foo.txt.
-    
-    document (dict) -- document dictionary for the document being parsed
-    
+    """Returns the document contents, after making the file inclusion
+    substitution.
+
+    Replaces instances of %%inc *.*%% with the contents of a plaintext
+    file. For example %%inc foo.txt%% would be replaced by the file
+    contents of include/foo.txt.
+
+    Args:
+      document (dict): document dictionary for the document being parsed
+
+    Returns:
+      str: document contents with other file contents included;
+        specified in inclusion tags--therein document['contents'].
+
     """
-    
+
     contents = document['contents']
 
     # while includes still exist, call them!
     # this solves the problem of having an include in an include.
-    include_directory = lib.SETTINGS['directories']['include']
+    settings = lib.ini('settings')
+    include_directory = settings['directories']['include']
 
     while tag_type_exists('inc', contents):
+
         # full element, element contents, and element name!
         for element in iter_tags('inc', contents):
             include_tag = element['name']
@@ -119,11 +149,18 @@ def include(document):
 def replace_functions(document):
     """Replace Sakura functions %%func function-name args%%.
 
-    document (dict) -- the document being evaluated to find the functions
-    edit (str) -- the document to place the evaluation of the function in.
-
     Used for parsing the function list _cache, which specified functions to
     use on every document therein cache.
+
+    Args:
+      document (dict): the document being evaluated
+        to find the functions.
+      edit (str): the document to place the evaluation
+        of the function in.
+
+    Returns:
+      str: the version of the document contents, with the function
+        tag calls evaluated and substituted.
 
     """
 
@@ -147,9 +184,15 @@ def replace_functions(document):
 def evaluate_function(element, contents, document_path, debug=False):
     """Take a given Sakura %%func%% element, and return the contents
     of said evaluation.
-    
-    element (dict) -- the dictionary generated from iter_tags().
-    document (str) -- the document to edit with the element evaluation
+
+    I need to explain the rules of evaluation better herein.
+
+    Args:
+      element (dict): the dictionary generated from iter_tags().
+      document (str): the document to edit with the element evaluation
+
+    Returns:
+        str: the document after evaluating/substituting a function tag.
 
     """
 
@@ -192,7 +235,12 @@ def parse(document_path):
     A document dictionary is generated and passed around quite a bit from
     here out.
 
-    document_path (str) -- path of file being parsed
+    Args:
+      document_path (str): path of file being parsed
+
+    Returns:
+      str: parsed/evaluated/substituted version of the contents
+        belonging to the file specified in document_path.
     
     """
 
@@ -206,8 +254,9 @@ def parse(document_path):
 
     # replace ((functions)) -- importantly last
     document = replace_functions(document)
+    settings = lib.ini('settings')
 
-    if lib.SETTINGS['parser']['minify'] == 'yes':
+    if settings['parser']['minify'] == 'yes':
         document = minify(document_path, document)
 
     return document
@@ -215,10 +264,18 @@ def parse(document_path):
 
 def get_args(contents):
     """Return a list of arguments therein the contents of a Sakura element.
-    
+
     If there are no arguments, returns None.
-    
-    contents (str) -- example: "func config httpd basehref"
+
+    Args:
+      contents (str) -- example: "func config httpd basehref"
+
+    Returns:
+      str OR None: returns a list of arguments belonging to
+        a tag, or returns None if no such arguments exist.
+
+    Notes:
+      Should also be handling complex kwargs, as well as args.
 
     """
 
@@ -234,14 +291,20 @@ def get_args(contents):
 def parse_cache(document_path):
     """Parse the cached document with a sakura function.
 
-    document_path (str) -- path of file being parsed
-    
-    Has a hardcoded value, bad!
+    Args:
+      document_path (str) -- path of file being parsed
+
+    Returns:
+      dict: the document (from document_path): contents...
+      WILL ELABORATE LATER
+
+    Notes:
+      Has a hardcoded value (function_list), bad!
 
     """
 
     function_list = 'cache/_cache'
-    
+
     with open(function_list) as f:
         function_list = f.read()
 
