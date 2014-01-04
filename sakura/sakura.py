@@ -37,7 +37,7 @@ def flush_cache():
 def cache():
     """Completely parse all viable files therein the content directory, to the
     cache directory.
-    
+
     """
 
     flush_cache()
@@ -153,8 +153,8 @@ class ThreadingCGIServer(SocketServer.ThreadingMixIn,
 
 
 def httpd():
-    """THIS IS A TOY. It is only here so users may test parsed contents before
-    making them public.
+    """THIS IS A TOY. It is only here so users may test parsed
+    contents before making them public.
 
     """
 
@@ -166,6 +166,7 @@ def httpd():
     server = ThreadingCGIServer((address, port), handler)
 
     try:
+
         while 1:
             sys.stdout.flush()
             server.handle_request()

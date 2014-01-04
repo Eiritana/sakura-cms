@@ -24,9 +24,10 @@ def iter_tags(tag, document):
       the "contents" of said tag (func blah blah), and the "name" of
       the tag (func).
 
-    >>> document = '%%func foo%% %%var bar%% %%inc foo.txt%% %%func bar%%'
-    >>> [element['name'] for element in iter_tags('func', document)]
-    ['foo', 'bar']
+    Examples:
+      >>> document = '%%func foo%% %%var bar%% %%inc foo.txt%% %%func bar%%'
+      >>> [element['name'] for element in iter_tags('func', document)]
+      ['foo', 'bar']
 
     """
 
@@ -54,11 +55,13 @@ def tag_type_exists(tag, document):
     Returns:
       bool: True if Sakura tags are present in string, False otherwise.
 
-    >>> document = 'blah %%inc foo.txt%% blah blah %%func bar%%'
-    >>> tag_type_exists('func', document)
-    True
-    >>> tag_type_exists('var', document)
-    False
+    Examples:
+      >>> document = 'blah %%inc foo.txt%% blah blah %%func bar%%'
+      >>> tag_type_exists('func', document)
+      True
+
+      >>> tag_type_exists('var', document)
+      False
 
     """
 
@@ -79,8 +82,9 @@ def minify(document_path, document):
     Notes:
       Not sure if it should be a %%func%% for _cache.
 
-    >>> minify('foo.html', '  what   ')
-    'what '
+    Examples:
+      >>> minify('foo.html', '  what   ')
+      'what '
 
     """
 
