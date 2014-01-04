@@ -20,7 +20,15 @@ def remote_install(path):
 
 
 def zip_file_index(zip_file):
-    """Return a list of paths in zip_file."""
+    """Return a list of paths in zip_file.
+    
+    Args:
+      zip_file (ZipFile): The zip file object to index.
+
+    Returns:
+      list: Each element is a path.
+
+    """
 
     is_sys_dir = lambda x: x.count('/') == 1 and x[-1] == '/'
     return [x for x in zip_file.namelist() if not is_sys_dir(x)]
@@ -29,16 +37,19 @@ def zip_file_index(zip_file):
 def sanity_check(path):
     """Assure zip contents adhere to file structure standard.
 
-    path (str) -- the path to the zip to perform a sanity check on
+    Args:
+      path (str): The path to the zip to perform a sanity check on
 
-    Yields a two-element tuple, firest element is path, and second is "error."
+    Yields:
+      tuple: two elements; first element is path, and second is "error."
 
     """
 
+    settings = lib.ini('settings')
     zip_file = ZipFile(path, 'r')
     zip_index = zip_file_index(zip_file)
     zip_file.close()
-    sane_directories = lib.SETTINGS['directories'].values()
+    sane_directories = settings['directories'].values()
 
     for path in zip_index:
 
@@ -55,12 +66,15 @@ def sanity_check(path):
 
 def check(path):
     """Used to check a snapshot before installing.
-    
+
     Assure all files extract to any subdirectories of a sakura system
     directory, e.g., cgi/, functions/, content/.
-    
-    Maybe this should take a zipfile object; should also perform
-    zip_file.testzip()
+
+    Args:
+      path (str): The path to the snapshot.
+
+    Notes:
+      Maybe this should take a zipfile object
 
     """
 
@@ -82,6 +96,10 @@ def file_checksum(path):
     """Generate a checksum to compare against later to detect
     file modification.
 
+    Args:
+      path (str): The path to the file, which to
+        generate a checksum for.
+
     """
 
     with open(path, 'rb') as f:
@@ -92,6 +110,11 @@ def snapshot(snapshot_path, *paths):
     """Create an arcive, consisting of specified paths. Recursive.
 
     Appends comment for zip_file, as package data
+
+    Args:
+      snapshot_path (str): The path to the snapshot.zip.
+      *paths (str): The paths to files to include
+        in the said snapshot.zip.
 
     """
 
@@ -113,7 +136,7 @@ def snapshot(snapshot_path, *paths):
 
                 try:
                     zip_file.write(file_path, file_path, ZIP_DEFLATED)
-                except:
+                except:  # THIS IS EVIL, BAD, HORRIBLE, AWFUL, WHY DOG, WHY!?!?!?!?!?!?!??!!??!?!
                     # the timestamp preceeded 1980 for some reason
                     os.utime(file_path, None)
                     zip_file.write(file_path, file_path, ZIP_DEFLATED)
@@ -123,7 +146,23 @@ def snapshot(snapshot_path, *paths):
 
 
 def install(path, update=False):
-    """snapshot zip-extraction protocol."""
+    """snapshot zip-extraction protocol.
+
+    Args:
+      path (str): The path to the snapshot to install.
+      update (bool, optional): If True, preform a plugin update.
+
+    Notes:
+      A whole lot of SQL.
+
+    Returns:
+      bool: Returns True if successful, False otherwise.
+        I ACTUALLY FORGOT IF THIS IS THE CASE OR NOT.
+
+    Notes:
+      I intend to improve this later (simplify).
+
+    """
 
     # sanity check
     sanity_check(path)
@@ -147,7 +186,7 @@ def install(path, update=False):
           )
           '''
     cursor.execute(sql)
-    
+
     # assure snapshot_directories table exists...
     sql = '''
           CREATE TABLE IF NOT EXISTS snapshot_directories
@@ -253,8 +292,13 @@ def install(path, update=False):
 
 
 def display_installed():
-    """Display installed snapshot information."""
-    
+    """Display installed snapshot information.
+
+    This is kind of a terrible function; should return data
+    instead of printing it, duh. Yield or return dictionaries.
+
+    """
+
     conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
     sql = 'SELECT * FROM snapshot_meta'
@@ -270,7 +314,13 @@ def display_installed():
 
 
 def delete(name):
-    """Delete file paths associated with snapshot."""
+    """Delete file paths associated with snapshot.
+
+    Args:
+      name (str): name of the snapshot to purge from the Sakura
+        installation.
+
+    """
 
     conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
@@ -331,16 +381,22 @@ def delete(name):
     return None
 
 
-def error(snapshot):
-    """This sucks. Should have proper exception?."""
+def error(snapshot):  # oh god fix this already i hope this comment is annoying enough to get someone to fix it
+    """This sucks. Should have proper exception."""
     print 'no such snapshot "%s" installed' % snapshot
     sys.exit(1)
 
 
 def info(snapshot):
     """Display files installed by "snapshot."
-    
-    Should also print snapshot_meta data.
+
+    Prints instead of returning some values; d'oh!
+
+    Args:
+      snapshot (str): name of snapshot which to get info.
+
+    Notes:
+      Should also print snapshot_meta data.
 
     """
 

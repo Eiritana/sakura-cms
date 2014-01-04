@@ -10,13 +10,15 @@ import os
 
 
 def load_functions(public):
-    """Returns a dictionary of "functions" (functions) and their arguments.
+    """Returns a dictionary of "functions" (functions)
+    and their arguments.
     
     Load functions to evaluate arguments/values pre-defined in "public"
     (dictionary).
 
     Args:
-      public (dict): Keyword arguments any function may select from by key.
+      public (dict): Keyword arguments any function may
+        select from by key.
 
     Returns:
         WILL ELABORATE LATER...
