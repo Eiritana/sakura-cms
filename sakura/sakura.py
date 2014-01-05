@@ -28,7 +28,7 @@ def flush_cache():
 
         shutil.rmtree(cache_directory)
 
-    except:  # this is friggin' awful; except what?!
+    except IOError:  # this is friggin' awful; except what?!
         pass
 
     os.mkdir(cache_directory)
@@ -46,20 +46,20 @@ def cache():
     cache_dir = settings['directories']['cache']
 
     for directory_path, file_names in lib.index().items():
-        directories = directory_path.split('/')[1:]
+        directories = directory_path.split(os.path.sep)[1:]
 
         # keep trailing slash!
-        new_directory = cache_dir + '/' 
+        new_directory = cache_dir
 
+        # if there are directories in path, then we need to create them
         if len(directories) > 0:
-            new_directory += '/'.join(directories) + '/'
-
-            # make directory
+            directories = os.path.sep.join(directories)
+            new_directory = os.path.join(new_directory, directories)
             os.mkdir(new_directory)
 
         for file_name in file_names:
-            file_path = directory_path + '/' + file_name
-            cached_file_path = new_directory + file_name
+            file_path = os.path.join(directory_path, file_name)
+            cached_file_path = os.path.join(new_directory, file_name)
 
             if file_name == '_cache':
                 # in the future this will be for exceptions for file names
@@ -67,6 +67,7 @@ def cache():
 
                 with open(file_path) as f:
                     cached_contents = f.read()
+
             else:
                 # parse!
                 cached_contents = parse.parse(file_path)
@@ -88,15 +89,16 @@ def recache():
     cache_dir = settings['directories']['cache']
 
     for directory_path, file_names in lib.index(cache_dir).items():
-        directories = directory_path.split('/')[1:]
-        new_directory = cache_dir + '/'
+        directories = directory_path.split(os.path.sep)[1:]
+        new_directory = cache_dir
 
         if len(directories) > 0:
-            new_directory += '/'.join(directories) + '/'
+            new_dirs = os.path.sep.join(directories)
+            new_directory = os.path.join(new_directory, new_dirs)
 
         for file_name in file_names:
-            file_path = directory_path + '/' + file_name
-            cached_file_path = new_directory + file_name
+            file_path = os.path.join(directory_path, file_name)
+            cached_file_path = os.path.join(new_directory, file_name)
             cached_file = parse.parse_cache(file_path)
 
             with open(cached_file_path, 'w') as f:
@@ -123,12 +125,15 @@ def setup():
 
 
 def backup():
-    """Zip the config and content directories into a backup/date folder"""
+    """Zip the config and content directories into a backup/date
+    folder.
+
+    """
 
     settings = lib.ini('settings')
     backup_directory = settings['directories']['backups']
     date_time = datetime.now().isoformat()
-    backup_directory += '/' + date_time + '/'
+    backup_directory = os.path.join(backup_directory, date_time)
     os.mkdir(backup_directory)
 
     # get the directories to backup, plus a setting

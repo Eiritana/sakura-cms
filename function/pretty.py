@@ -1,4 +1,8 @@
-"""Prettify HTML with BeautifulSoup."""
+"""Prettify HTML with BeautifulSoup.
+
+Primarily manages indentation.
+
+"""
 
 from sakura.common import ini
 from bs4 import BeautifulSoup

@@ -6,6 +6,7 @@ which includes document and document path.
 """
 
 
+import os
 import re
 from cStringIO import StringIO
 import common as lib
@@ -98,6 +99,15 @@ def minify(document_path, document):
     return document
 
 
+class IncludeError(Exception):
+    def __init__(self, path, current_document_path):
+        message = (
+                   '%s does not exist (inclusion on %s)'
+                   % (path, current_document_path)
+                  )
+        Exception.__init__(self, message)
+
+
 def include(document):
     """Returns the document contents, after making the file inclusion
     substitution.
@@ -127,11 +137,16 @@ def include(document):
         # full element, element contents, and element name!
         for element in iter_tags('inc', contents):
             include_tag = element['name']
-            path = include_directory + '/' + include_tag
+            path = os.path.join(include_directory, include_tag)
 
             # retrieve file specified in %%inc%% call
-            with open(path) as f:
-                include = f.read().strip()
+            try:
+
+                with open(path) as f:
+                    include = f.read().strip()
+
+            except IOError:
+                raise IncludeError(path, document['path'])
 
             # use attributes as replacements; %%substitutions%%
             # reading aloud will summon cthulu, etc.
@@ -295,22 +310,35 @@ def get_args(contents):
 def parse_cache(document_path):
     """Parse the cached document with a sakura function.
 
+    I use this while iterating through files in the cache,
+    as this will perform all of the functions therein
+    _cache, on the document_path in question.
+
     Args:
       document_path (str) -- path of file being parsed
 
     Returns:
-      dict: the document (from document_path): contents...
-      WILL ELABORATE LATER
+      dict|None: the document (from document_path): contents...
+        Returns None if there is no _cache file.
 
     Notes:
       Has a hardcoded value (function_list), bad!
 
     """
 
-    function_list = 'cache/_cache'
+    function_list = 'cache/_cache'  # will go away soon! (os.path..)
 
-    with open(function_list) as f:
-        function_list = f.read()
+    # so this isn't fully implemented yet. x.x
+    settings = lib.ini('settings')
+    cache_dir = settings['directories']['cache']
+
+    try:
+
+        with open(function_list) as f:
+            function_list = f.read()
+
+    except IOError:
+        return None
 
     with open(document_path) as f:
         edit_contents = f.read()

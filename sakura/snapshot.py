@@ -30,7 +30,7 @@ def zip_file_index(zip_file):
 
     """
 
-    is_sys_dir = lambda x: x.count('/') == 1 and x[-1] == '/'
+    is_sys_dir = lambda x: x.count(os.path.sep) == 1 and x[-1] == os.path.sep
     return [x for x in zip_file.namelist() if not is_sys_dir(x)]
 
 
@@ -40,8 +40,11 @@ def sanity_check(path):
     Args:
       path (str): The path to the zip to perform a sanity check on
 
-    Yields:
-      tuple: two elements; first element is path, and second is "error."
+    Notes:
+      Needs to actually return values, not print them!
+
+    Returns:
+      None
 
     """
 
@@ -54,7 +57,7 @@ def sanity_check(path):
     for path in zip_index:
 
         error = True
-        path = path.split('/', 1)[0]
+        path = path.split(os.path.sep, 1)[0]
 
         if os.path.basename(path) in sane_directories:
             continue
@@ -75,6 +78,9 @@ def check(path):
 
     Notes:
       Maybe this should take a zipfile object
+
+    Returns:
+      None
 
     """
 
@@ -100,6 +106,13 @@ def file_checksum(path):
       path (str): The path to the file, which to
         generate a checksum for.
 
+    Notes:
+      Almost boilerplate...
+
+    Returns:
+      str: sha256 hex digest of file contents belonging to
+        designated "path."
+
     """
 
     with open(path, 'rb') as f:
@@ -115,6 +128,9 @@ def snapshot(snapshot_path, *paths):
       snapshot_path (str): The path to the snapshot.zip.
       *paths (str): The paths to files to include
         in the said snapshot.zip.
+
+    Returns:
+      None
 
     """
 
@@ -132,11 +148,11 @@ def snapshot(snapshot_path, *paths):
             zip_file.write(directory, directory, ZIP_DEFLATED)
 
             for file_name in files:
-                file_path = directory + '/' + file_name
+                file_path = os.path.join(directory, file_name)
 
                 try:
                     zip_file.write(file_path, file_path, ZIP_DEFLATED)
-                except:  # THIS IS EVIL, BAD, HORRIBLE, AWFUL, WHY DOG, WHY!?!?!?!?!?!?!??!!??!?!
+                except IOError:  # I forgot what this weird exception actually is
                     # the timestamp preceeded 1980 for some reason
                     os.utime(file_path, None)
                     zip_file.write(file_path, file_path, ZIP_DEFLATED)
@@ -170,14 +186,14 @@ def install(path, update=False):
     # now open the archive...
     zip_file = ZipFile(path, 'r')
     zip_index = zip_file_index(zip_file)
-    zip_file_name = path.rsplit('/', 1)[-1].replace('.zip', '')
+    zip_file_name = os.path.basename(path).replace('.zip', '')
 
     # setup database connection
     conn = sqlite3.connect('database/sakura.db')
     cursor = conn.cursor()
 
     # assure snapshot_files table exists...
-    sql = '''\
+    sql = '''
           CREATE TABLE IF NOT EXISTS snapshot_files
           (
            path TEXT UNIQUE,
@@ -198,7 +214,7 @@ def install(path, update=False):
     cursor.execute(sql)
 
     # assure snapshot_meta exists
-    sql = '''\
+    sql = '''
           CREATE TABLE IF NOT EXISTS snapshot_meta
           (
            name TEXT UNIQUE,
@@ -218,7 +234,6 @@ def install(path, update=False):
             print 'snapshot already installed: ' + zip_file_name
             return False
 
-
     # record files extracted...
     for path in zip_index:
 
@@ -229,7 +244,7 @@ def install(path, update=False):
 
         if update:
             # if file was never modified, overwrite if update
-            sql = '''\
+            sql = '''
                   SELECT original_checksum FROM snapshot_files
                   WHERE path=?
                   '''
@@ -245,12 +260,13 @@ def install(path, update=False):
             if last_checksum != original_checksum:
                 question = 'replace modified file %s (y/n)? ' % path
                 permission = raw_input(question)
-                
+
                 if permission == 'y':
                    pass
                 else:
                     print 'skipping %s' % path
                     continue
+
             else:
                 print "%s hasn't changed!" % path
                 continue
@@ -260,7 +276,6 @@ def install(path, update=False):
         # test if directory
         try:
             new_checksum = file_checksum(path)
-
         except IOError:
             # can't create checksum for directory!
             # skip checksum stuff--custom sql here!
@@ -271,7 +286,7 @@ def install(path, update=False):
             cursor.execute(sql, (path, zip_file_name))
             continue
 
-        sql = '''\
+        sql = '''
               INSERT INTO snapshot_files (path, snapshot, original_checksum)
               VALUES (?, ?, ?)
               '''
@@ -319,6 +334,9 @@ def delete(name):
     Args:
       name (str): name of the snapshot to purge from the Sakura
         installation.
+
+    Returns:
+      None: will return list of deleted paths in the future...
 
     """
 
@@ -396,7 +414,11 @@ def info(snapshot):
       snapshot (str): name of snapshot which to get info.
 
     Notes:
-      Should also print snapshot_meta data.
+      Should also print snapshot_meta data. Should return data not
+      just print it!
+
+    Returns:
+      None
 
     """
 

@@ -26,7 +26,9 @@ def ini(path):
 
     parsed_config = {}
 
-    path = 'config/' + path + '.ini'
+    # use os.path
+    config_file_name = path + '.ini'
+    path = os.path.normpath(os.path.join('config', config_file_name))
 
     with open(path) as f:
         config = ConfigParser.ConfigParser()
