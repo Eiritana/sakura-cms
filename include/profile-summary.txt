@@ -1,5 +1,5 @@
 <dl>
- <dt><a href="portfolio/%%var document%%">%%var name%%</a></dt>
- <dd class="profile-pic"><img src="%%var image%%"></dd>
- <dd>%%var description%%</dd>
+ <dt><a href="portfolio/##var document##">##var name##</a></dt>
+ <dd class="profile-pic"><img src="##var image##"></dd>
+ <dd>##var description##</dd>
 </dl>

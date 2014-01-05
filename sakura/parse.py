@@ -17,22 +17,22 @@ def iter_tags(tag, document):
     """Yields a dictionary of data for the current "tag" in iteration.
 
     Args:
-      tag (str): the name of the element. %%tag%%
+      tag (str): the name of the element. ##tag##
       document (str): iterate tag in this document
 
     Yields:
-      dict: "full" tag being substituted (%%func blah blah%%),
+      dict: "full" tag being substituted (##func blah blah##)
       the "contents" of said tag (func blah blah), and the "name" of
       the tag (func).
 
     Examples:
-      >>> document = '%%func foo%% %%var bar%% %%inc foo.txt%% %%func bar%%'
+      >>> document = '##func foo## ##var bar## ##inc foo.txt## ##func bar##'
       >>> [element['name'] for element in iter_tags('func', document)]
       ['foo', 'bar']
 
     """
 
-    pattern = '%%' + tag + ' (.*)%%'
+    pattern = '##' + tag + ' (.*)##'
 
     for match in re.finditer(pattern, document):
         full_element = match.group(0)  # inc. the brackets
@@ -50,14 +50,14 @@ def tag_type_exists(tag, document):
     """Return True if tags with bracket types exist, else false.
 
     Args:
-      tag (str) -- the kind of %%tag%% to search for
+      tag (str) -- the kind of ##tag## to search for
       document (str) -- the document to search in
 
     Returns:
       bool: True if Sakura tags are present in string, False otherwise.
 
     Examples:
-      >>> document = 'blah %%inc foo.txt%% blah blah %%func bar%%'
+      >>> document = 'blah ##inc foo.txt## blah blah ##func bar##'
       >>> tag_type_exists('func', document)
       True
 
@@ -66,7 +66,7 @@ def tag_type_exists(tag, document):
 
     """
 
-    pattern = '%%' + tag + ' (.*)%%'
+    pattern = '##' + tag + ' (.*)##'
     return True if re.search(pattern, document) else False
 
 
@@ -81,7 +81,7 @@ def minify(document_path, document):
       str: whitespace-reduced version of the document arg.
 
     Notes:
-      Not sure if it should be a %%func%% for _cache.
+      Not sure if it should be a ##func## for _cache.
 
     Examples:
       >>> minify('foo.html', '  what   ')
@@ -112,8 +112,8 @@ def include(document):
     """Returns the document contents, after making the file inclusion
     substitution.
 
-    Replaces instances of %%inc *.*%% with the contents of a plaintext
-    file. For example %%inc foo.txt%% would be replaced by the file
+    Replaces instances of ##inc *.*## with the contents of a plaintext
+    file. For example ##inc foo.txt## would be replaced by the file
     contents of include/foo.txt.
 
     Args:
@@ -139,7 +139,7 @@ def include(document):
             include_tag = element['name']
             path = os.path.join(include_directory, include_tag)
 
-            # retrieve file specified in %%inc%% call
+            # retrieve file specified in ##inc## call
             try:
 
                 with open(path) as f:
@@ -148,7 +148,7 @@ def include(document):
             except IOError:
                 raise IncludeError(path, document['path'])
 
-            # use attributes as replacements; %%substitutions%%
+            # use attributes as replacements; ##substitutions##
             # reading aloud will summon cthulu, etc.
             attribute_pattern = (
                                  """(\S+)=["']?((?:.(?!["']?\s+"""
@@ -157,7 +157,7 @@ def include(document):
 
             for match in re.finditer(attribute_pattern, element['full']):
                 value = match.group(2)
-                key = '%%var ' + match.group(1) + '%%'
+                key = '##var ' + match.group(1) + '##'
                 include = include.replace(key, value)
 
             contents = contents.replace(element['full'], include)
@@ -166,7 +166,7 @@ def include(document):
 
 
 def replace_functions(document):
-    """Replace Sakura functions %%func function-name args%%.
+    """Replace Sakura functions ##func function-name args##
 
     Used for parsing the function list _cache, which specified functions to
     use on every document therein cache.
@@ -212,7 +212,7 @@ def replace_functions(document):
 
 def evaluate_function(element, contents, document_path,
                       debug=False, no_return=False):
-    """Take a given Sakura %%func%% element, and return the contents
+    """Take a given Sakura ##func## element, and return the contents
     of said evaluation.
 
     I need to explain the rules of evaluation better herein.
@@ -240,7 +240,7 @@ def evaluate_function(element, contents, document_path,
 
     except KeyError:
         error_vars = (document_path, element['name'], element['full'])
-        raise Exception('%%func%%    %s: %s is not loaded (%s)' % error_vars)
+        raise Exception('##func##    %s: %s is not loaded (%s)' % error_vars)
 
     # if we do have user defined arguments in the element,
     # then append them to the args!
@@ -256,12 +256,7 @@ def evaluate_function(element, contents, document_path,
         return ''
 
     if replace_all:
-
-        try:
-            return data.replace(element['full'], '')
-        except:
-            raise Exception((element, no_return))
-
+        return data.replace(element['full'], '')
     else:
         return contents.replace(element['full'], data)
 
