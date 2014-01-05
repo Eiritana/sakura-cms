@@ -173,9 +173,14 @@ def replace_functions(document):
 
     Args:
       document (dict): the document being evaluated
-        to find the functions.
-      edit (str): the document to place the evaluation
-        of the function in.
+        to find the functions. The dictionary contents being:
+
+          * edit (str): the document to place the evaluation
+              of the function in.
+          * path (str):
+          * contents (str):
+          * no_return (bool): if True this function offers no
+              return string.
 
     Returns:
       str: the version of the document contents, with the function
@@ -187,6 +192,7 @@ def replace_functions(document):
     document_path = document['path']
     edit_contents = document.get('edit_contents', None)
     new_contents = edit_contents or contents
+    no_return = 'no_return' in document and document['no_return']
 
     # replace ((functions)) -- importantly last
     for element in iter_tags('func', contents):
@@ -194,13 +200,18 @@ def replace_functions(document):
                                          element,
                                          new_contents,
                                          document_path,
-                                         debug=edit_contents
+                                         debug=edit_contents,
+                                         no_return=no_return,
                                         )
 
-    return new_contents
+    if no_return:
+        return ''
+    else:
+        return new_contents
 
 
-def evaluate_function(element, contents, document_path, debug=False):
+def evaluate_function(element, contents, document_path,
+                      debug=False, no_return=False):
     """Take a given Sakura %%func%% element, and return the contents
     of said evaluation.
 
@@ -224,7 +235,9 @@ def evaluate_function(element, contents, document_path, debug=False):
              }
 
     try:
-        function, args = func.load_functions(public)[element['name']]
+        func_name = element['name']
+        function, args, replace_all = func.load_functions(public)[func_name]
+
     except KeyError:
         error_vars = (document_path, element['name'], element['full'])
         raise Exception('%%func%%    %s: %s is not loaded (%s)' % error_vars)
@@ -239,8 +252,16 @@ def evaluate_function(element, contents, document_path, debug=False):
     if debug:
         return data
 
-    if user_defined_args:
-        return data.replace(element['full'], '')
+    if no_return:
+        return ''
+
+    if replace_all:
+
+        try:
+            return data.replace(element['full'], '')
+        except:
+            raise Exception((element, no_return))
+
     else:
         return contents.replace(element['full'], data)
 
@@ -347,6 +368,45 @@ def parse_cache(document_path):
                 'contents': function_list,
                 'edit_contents': edit_contents,
                 'path': document_path
+               }
+    return replace_functions(document)
+
+
+def generate():
+    """Generate files based on functions therein _generate.
+
+    This is the last thing to run while caching.
+
+    These kinds of functions are totally independent from
+    document-specific data.
+
+    Returns:
+        None
+
+    Notes:
+      Bad hard-coded value (function_list)
+      Shares A LOT with parse_cache...
+
+    """
+
+    function_list = 'cache/_generate'  # will go away soon! (os.path..)
+
+    # so this isn't fully implemented yet. x.x
+    settings = lib.ini('settings')
+    cache_dir = settings['directories']['cache']
+
+    try:
+
+        with open(function_list) as f:
+            function_list = f.read()
+
+    except IOError:
+        return None
+
+    document = {
+                'contents': function_list,
+                'no_return': True,
+                'path': function_list
                }
     return replace_functions(document)
 

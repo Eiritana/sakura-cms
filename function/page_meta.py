@@ -9,6 +9,7 @@ import os.path, time
 
 
 SAKURA_ARGS =  ['document_path']
+REPLACE_ALL = False
 
 
 def page_meta(path):

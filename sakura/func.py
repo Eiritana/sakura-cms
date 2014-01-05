@@ -21,7 +21,9 @@ def load_functions(public):
         select from by key.
 
     Returns:
-        WILL ELABORATE LATER...
+        dict: key is the func name/module name, and the values are
+          a three-element tuple:
+          (function, argument [tuple], replace_all [bool])
 
     """
 
@@ -37,14 +39,16 @@ def load_functions(public):
 
         # import the module and the keys/arguments
         module_import = "%s.%s" % (package, module_name)
-        args = __import__(module_import, fromlist=["SAKURA_ARGS"])
+        config_variables = ('SAKURA_ARGS', 'REPLACE_ALL')
+        args = __import__(module_import, fromlist=config_variables)
+        replace_all = args.REPLACE_ALL
         args = args.SAKURA_ARGS
 
         # load pre-defined arguments via keys/arguments
         args = [public[arg] for arg in args]
         func = __import__(module_import, fromlist=[module_name])
         func = getattr(func, module_name)
-        functions[module_name] = (func, args)
+        functions[module_name] = (func, args, replace_all)
 
     return functions
 

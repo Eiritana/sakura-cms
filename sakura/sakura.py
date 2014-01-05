@@ -61,7 +61,7 @@ def cache():
             file_path = os.path.join(directory_path, file_name)
             cached_file_path = os.path.join(new_directory, file_name)
 
-            if file_name == '_cache':
+            if file_name in ('_cache', '_generate'):
                 # in the future this will be for exceptions for file names
                 # and file types we want to skip parsing and just copy over
 
@@ -76,6 +76,7 @@ def cache():
                 f.write(cached_contents)
 
     recache()
+    parse.generate()
     return None
 
 

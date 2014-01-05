@@ -10,6 +10,7 @@ import os
 
 
 SAKURA_ARGS = ['document', 'document_path']
+REPLACE_ALL = True
 
 
 def pretty(document, document_path):

@@ -10,6 +10,7 @@ from lxml import etree
 
 
 SAKURA_ARGS = ['document_path', 'document']
+REPLACE_ALL = True
 
 
 def seo(document_path, document):

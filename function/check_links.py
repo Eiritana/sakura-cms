@@ -7,6 +7,7 @@ from lxml import etree
 
 
 SAKURA_ARGS =  ['document_path', 'document']
+REPLACE_ALL = True
 
 
 def check_links(document_path, document, nav_id):

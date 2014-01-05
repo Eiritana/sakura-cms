@@ -10,6 +10,7 @@ import os
 
 
 SAKURA_ARGS = ['document_path', 'document']
+REPLACE_ALL = True
 
 
 def nav_active(document_path, document, nav_id):

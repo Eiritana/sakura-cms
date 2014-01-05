@@ -2,6 +2,10 @@
 
 %%func tags some_tag another_tag%%
 
+Notes:
+  I hardcoded the value to the cache directory for generating tag link
+  lists. Will solve in the future.
+
 """
 
 
@@ -11,14 +15,15 @@ from bs4 import BeautifulSoup
 from page_meta import page_meta
 from sakura.common import ini
 import sqlite3 as sqlite
+import os
 
 
 SAKURA_ARGS = ['document_path', 'document']  # i wanna rename document to contents
+REPLACE_ALL = False
 
 
-def tags(document_path, document, *args):
-    # check/setup tables in sqlite db
-    conn = sqlite.connect('database/tags.db')
+def tag(document_path, document, *args):
+    conn = sqlite.connect('database/tag.db')
     cursor = conn.cursor()
 
     # because I like natural joins!
@@ -42,14 +47,19 @@ def tags(document_path, document, *args):
           );
           '''
     cursor.executescript(sql)
-    document_directory, __ = document_path.rsplit('/', 1)(document_directory)
+    document_directory = os.path.dirname(document_path)  # NOT USED ELSEWHERE!
     settings = ini('blog_index')
-    soup = BeautifulSoup(article)
+    soup = BeautifulSoup(document)
 
     # article table: article_id, title, href
     title_element = soup.find(id=(settings['title']['id'],))
-    title = title_element.contents[0]
-    href = path.split('/', 1)[-1]
+
+    try:
+        title = title_element.contents[0]
+    except:
+        raise Exception(soup)
+
+    href = document_path.split(os.path.sep, 1)[-1]
     sql = 'INSERT INTO article (title, href) VALUES (?, ?)'
     cursor.execute(sql, (title, href))
 
@@ -58,29 +68,22 @@ def tags(document_path, document, *args):
         cursor.execute('INSERT INTO tag (name) VALUES (?)', (tag,))
 
     # link tabs to article in db
-    sql = 'SELECT id FROM article WHERE href=?'
-    article_id = cursor.fetchone(sql, (href,))[0]
+    sql = 'SELECT article_id FROM article WHERE href=?'
+    cursor.execute(sql, (href,))
+    article_id = cursor.fetchone()[0]
+    tag_list = ['<ul class="tag-list">']
 
-
-def build_index():
-    
     for tag in args:
-        sql = 'INSERT INTO article_tag (article_id, tag_id)'
+        sql = '''
+              INSERT INTO article_tag (article_id, tag_id)
+              VALUES (?, (SELECT tag_id FROM tag WHERE name=?))
+              '''
         cursor.execute(sql, (article_id, tag))
+        entry = '<li><a href="/cache/index_%s.html">%s</a></li>' % (tag, tag)
+        tag_list.append(entry)
 
-    sql = '''
-          SELECT * FROM article_tag
-          NATURAL JOIN tag
-          NATURAL JOIN article
-          ORDER BY tag_id
-          '''
-    cursor.execute(sql)
-    rows = cursor.fetchall()
+    conn.commit()
     conn.close()
-
-    for row in rows:
-        raise Exception(row)
-        index_html = StringIO()
-
-    return contents.getvalue()
+    tag_list.append('</ul>')
+    return '\n'.join(tag_list)
 

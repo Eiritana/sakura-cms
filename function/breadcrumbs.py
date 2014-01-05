@@ -10,6 +10,7 @@ from sakura.common import ini
 
 
 SAKURA_ARGS =  ['document_path']
+REPLACE_ALL = False
 
 
 def breadcrumbs(path):

@@ -5,6 +5,7 @@ from sakura.common import ini
 
 
 SAKURA_ARGS =  ['document']
+REPLACE_ALL = True
 
 
 def css(document, css_path):

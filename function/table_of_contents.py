@@ -16,6 +16,7 @@ from cStringIO import StringIO
 
 
 SAKURA_ARGS = ['document_path', 'document']
+REPLACE_ALL = False
 
 
 def table_of_contents(document_path, document):

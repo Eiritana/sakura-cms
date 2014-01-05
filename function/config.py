@@ -12,6 +12,7 @@ from sakura import common
 
 
 SAKURA_ARGS =  ['document', 'element_full']
+REPLACE_ALL = True
 
 
 def config(document, replace, section, key):
