@@ -106,7 +106,7 @@ def include(document):
             # Includes are able to reference the attributes from the
             # respective include-octothorpe.
             # ##var title## will return "wag" from ##inc title='wag'##
-            attributes = tag.attributes(element['full'])
+            attributes = tag.get_attributes(element['full'])
 
             for attribute_name, attribute_value in attributes.items():
                 octothorpe_variable = (

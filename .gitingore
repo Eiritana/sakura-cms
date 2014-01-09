@@ -1,0 +1,6 @@
+*.pyc
+*.core
+include/
+content/
+cache/
+*.zip

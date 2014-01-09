@@ -60,7 +60,7 @@ def tag(document_path, document, *args):
         raise Exception(soup)
 
     href = document_path.split(os.path.sep, 1)[-1]
-    sql = 'INSERT INTO article (title, href) VALUES (?, ?)'
+    sql = 'INSERT OR IGNORE INTO article (title, href) VALUES (?, ?)'
     cursor.execute(sql, (title, href))
 
     # assure tags in db
@@ -77,7 +77,7 @@ def tag(document_path, document, *args):
 
     for tag in args:
         sql = '''
-              INSERT INTO article_tag (article_id, tag_id)
+              INSERT OR IGNORE INTO article_tag (article_id, tag_id)
               VALUES (?, (SELECT tag_id FROM tag WHERE name=?))
               '''
         cursor.execute(sql, (article_id, tag))
