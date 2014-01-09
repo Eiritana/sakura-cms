@@ -5,3 +5,6 @@ content/
 cache/
 include/
 *.zip
+*.core
+*.swn
+*swo
