@@ -6,9 +6,10 @@ article therein.
 
 from sakura import common
 from cStringIO import StringIO
-from bs4 import BeautifulSoup
+import re
 from page_meta import page_meta
 from sakura.common import ini
+from sakura import tag
 
 
 SAKURA_ARGS = ['document_path']
@@ -21,7 +22,7 @@ def blog_index(document_path):
     contents = StringIO()  # being replaced
     index_d = common.index(document_directory)
     truncate = 50
-    
+
     # title/permalink
     open_tag = settings['title']['open']
     close_tag = settings['title']['close']
@@ -47,9 +48,16 @@ def blog_index(document_path):
                 article = f.read()
 
             # get the article title, permalink
-            soup = BeautifulSoup(article)
-            title_element = soup.find(id=(settings['title']['id'],))
-            title = title_element.contents[0]
+            # get title from octothorpe ##code##
+            for __, attributes in tag.iter_attribute(
+                                                     article,
+                                                     'include',
+                                                     'title'
+                                                     ):
+
+                title = attributes['title']
+                break
+
             contents.write(container_open)
             contents.write(header_open)
             link = path.split('/', 1)[-1]
@@ -60,8 +68,9 @@ def blog_index(document_path):
             contents.write(header_close)
 
             # get the first paragraph after the article title
-            paragraph = str(title_element.findNextSibling('p'))
-            contents.write(paragraph)
+            # I'll have to grab the first paragraph from the article path
+            #paragraph = str(title_element.findNextSibling('p'))
+            #contents.write(paragraph)
             contents.write(container_close)
 
     return contents.getvalue()

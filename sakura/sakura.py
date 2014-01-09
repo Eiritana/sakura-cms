@@ -45,45 +45,54 @@ def cache():
     content_dir = settings['directories']['content']
     cache_dir = settings['directories']['cache']
 
-    for directory_path, file_names in lib.index().items():
-        directories = directory_path.split(os.path.sep)[1:]
-
-        # keep trailing slash!
-        new_directory = cache_dir
+    for working_directory, file_names in lib.index().items():
+        # first we remove the base (usually content) directory
+        baseless_directory_list = working_directory.split(os.path.sep)[1:]
+        baseless_directory = os.path.sep.join(baseless_directory_list)
 
         # if there are directories in path, then we need to create them
-        if len(directories) > 0:
-            directories = os.path.sep.join(directories)
-            new_directory = os.path.join(new_directory, directories)
-            os.mkdir(new_directory)
+        if len(baseless_directory_list) > 0:
+            output_directory = os.path.join(cache_dir, baseless_directory)
+            os.mkdir(output_directory)
+        else:
+            output_directory = cache_dir
 
         for file_name in file_names:
-            file_path = os.path.join(directory_path, file_name)
-            cached_file_path = os.path.join(new_directory, file_name)
+            # join the current file name to the current directory (sans base)
+            # then join that with
+            baseless_file_path = os.path.join(baseless_directory, file_name)
+            content_file_path = os.path.join(content_dir, baseless_file_path)
+            cache_file_path = os.path.join(output_directory, file_name)
 
             if file_name in ('_cache', '_generate'):
                 # in the future this will be for exceptions for file names
                 # and file types we want to skip parsing and just copy over
 
-                with open(file_path) as f:
+                with open(content_file_path) as f:
                     cached_contents = f.read()
 
             else:
                 # parse!
-                cached_contents = parse.parse(file_path)
+                cached_contents = parse.parse(baseless_file_path)
 
-            with open(cached_file_path, 'w') as f:
-                f.write(cached_contents)
+            with open(cache_file_path, 'w') as f:
+
+                try:
+                    f.write(cached_contents)
+                except TypeError:
+                    raise Exception((cache_file_path, cached_contents))
 
     recache()
-    parse.generate()
+    parse.cache_generate()
     return None
 
 
 def recache():
     """Finally, go over the cached/refreshed contents therein the cache
     directory and apply functions to each.
-    
+
+    What the hell is this even for, again? Isn't this cache_generate()?
+
     """
 
     settings = lib.ini('settings')

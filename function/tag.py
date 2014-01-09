@@ -64,8 +64,10 @@ def tag(document_path, document, *args):
     cursor.execute(sql, (title, href))
 
     # assure tags in db
+    # yes, this is typically faster than attempting to convert args to a list
+    # of tuplesand using executemany
     for tag in args:
-        cursor.execute('INSERT INTO tag (name) VALUES (?)', (tag,))
+        cursor.execute('INSERT OR IGNORE INTO tag (name) VALUES (?)', (tag,))
 
     # link tabs to article in db
     sql = 'SELECT article_id FROM article WHERE href=?'

@@ -37,7 +37,13 @@ def table_of_contents(document_path, document):
 
     # start table of contents... table
     html.write(table_settings['container']['open_tag'])
-    __, document_path = document_path.split('/', 1)
+
+    try:
+        # use os.path instead.
+        __, document_path = document_path.split('/', 1)
+    except ValueError:
+        raise Exception(document_path)
+
     number_of_entries = 0
     has_nested = False
 
@@ -53,7 +59,9 @@ def table_of_contents(document_path, document):
         level_text = element.text
 
         if level_id:
-            entry = '<a href="%s#%s">%s</a>' % (document_path, level_id, level_text)
+            subs = (document_path, level_id, level_text)
+            entry = '<a href="%s#%s">%s</a>' % subs
+
         else:
             entry = level_text
 

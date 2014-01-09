@@ -10,93 +10,48 @@ import os
 import re
 from cStringIO import StringIO
 import common as lib
-import func
+import function
+import tag
 
 
-def iter_tags(tag, document):
-    """Yields a dictionary of data for the current "tag" in iteration.
-
-    Args:
-      tag (str): the name of the element. ##tag##
-      document (str): iterate tag in this document
-
-    Yields:
-      dict: "full" tag being substituted (##func blah blah##)
-      the "contents" of said tag (func blah blah), and the "name" of
-      the tag (func).
-
-    Examples:
-      >>> document = '##func foo## ##var bar## ##inc foo.txt## ##func bar##'
-      >>> [element['name'] for element in iter_tags('func', document)]
-      ['foo', 'bar']
-
-    """
-
-    pattern = '##' + tag + ' (.*)##'
-
-    for match in re.finditer(pattern, document):
-        full_element = match.group(0)  # inc. the brackets
-        element_contents = match.group(1)  # exclude brackets
-        element_name = element_contents.split(' ', 1)[0]
-
-        yield {
-               'full': full_element,
-               'contents': element_contents,
-               'name': element_name
-              }
-
-
-def tag_type_exists(tag, document):
-    """Return True if tags with bracket types exist, else false.
+def from_dir(directory, file_path, path=False):
+    """Return the contents of a file therein the config-specified
+    directory.
 
     Args:
-      tag (str) -- the kind of ##tag## to search for
-      document (str) -- the document to search in
+      file_path (str): the filepath/filename, relative to
+        the cache directory.
+
+      path (str): if True return the new path as well
 
     Returns:
-      bool: True if Sakura tags are present in string, False otherwise.
-
-    Examples:
-      >>> document = 'blah ##inc foo.txt## blah blah ##func bar##'
-      >>> tag_type_exists('func', document)
-      True
-
-      >>> tag_type_exists('var', document)
-      False
+      str|tuple: contents of file, or a tuple containing both the
+        contents and the new file path
 
     """
 
-    pattern = '##' + tag + ' (.*)##'
-    return True if re.search(pattern, document) else False
+    settings = lib.ini('settings')
+    cache_dir = settings['directories'][directory]
+    file_path = os.path.join(cache_dir, file_path)
 
+    try:
 
-def minify(document_path, document):
-    """Compress CSS and HTML mostly by removing whitespace.
+        with open(file_path) as f:
 
-    Args:
-      document_path (str): path to file to be "minimized"
-      document (str): the contents of said document
+            contents = f.read()
 
-    Returns:
-      str: whitespace-reduced version of the document arg.
+            if path:
+                return (contents, file_path)
+            else:
+                return contents
 
-    Notes:
-      Not sure if it should be a ##func## for _cache.
+    except IOError:
+        raise Exception(file_path)
 
-    Examples:
-      >>> minify('foo.html', '  what   ')
-      'what '
-
-    """
-
-    __, file_extension = os.path.splitext(document_path)
-    file_extension = file_extension.replace('.', '')
-    document = document.strip()
-
-    if file_extension in ('html', 'css'):
-        document = document.replace('  ', ' ').replace('\n', '')
-
-    return document
+        if path:
+            return (None, None)
+        else:
+            return None
 
 
 class IncludeError(Exception):
@@ -132,10 +87,10 @@ def include(document):
     settings = lib.ini('settings')
     include_directory = settings['directories']['include']
 
-    while tag_type_exists('inc', contents):
+    while tag.exists('include', contents):
 
         # full element, element contents, and element name!
-        for element in iter_tags('inc', contents):
+        for element in tag.iter_tags('include', contents):
             include_tag = element['name']
             path = os.path.join(include_directory, include_tag)
 
@@ -148,117 +103,22 @@ def include(document):
             except IOError:
                 raise IncludeError(path, document['path'])
 
-            # use attributes as replacements; ##substitutions##
-            # reading aloud will summon cthulu, etc.
-            attribute_pattern = (
-                                 """(\S+)=["']?((?:.(?!["']?\s+"""
-                                 """(?:\S+)=|[>"']))+.)["']?"""
-                                )
+            # Includes are able to reference the attributes from the
+            # respective include-octothorpe.
+            # ##var title## will return "wag" from ##inc title='wag'##
+            attributes = tag.attributes(element['full'])
 
-            for match in re.finditer(attribute_pattern, element['full']):
-                value = match.group(2)
-                key = '##var ' + match.group(1) + '##'
-                include = include.replace(key, value)
+            for attribute_name, attribute_value in attributes.items():
+                octothorpe_variable = (
+                                       tag.TAG_VARIABLE_LEFT
+                                       + attribute_name
+                                       + tag.TAG_VARIABLE_RIGHT
+                                      )
+                include = include.replace(octothorpe_variable, attribute_value)
 
             contents = contents.replace(element['full'], include)
 
     return contents
-
-
-def replace_functions(document):
-    """Replace Sakura functions ##func function-name args##
-
-    Used for parsing the function list _cache, which specified functions to
-    use on every document therein cache.
-
-    Args:
-      document (dict): the document being evaluated
-        to find the functions. The dictionary contents being:
-
-          * edit (str): the document to place the evaluation
-              of the function in.
-          * path (str):
-          * contents (str):
-          * no_return (bool): if True this function offers no
-              return string.
-
-    Returns:
-      str: the version of the document contents, with the function
-        tag calls evaluated and substituted.
-
-    """
-
-    contents = document['contents']
-    document_path = document['path']
-    edit_contents = document.get('edit_contents', None)
-    new_contents = edit_contents or contents
-    no_return = 'no_return' in document and document['no_return']
-
-    # replace ((functions)) -- importantly last
-    for element in iter_tags('func', contents):
-        new_contents = evaluate_function(
-                                         element,
-                                         new_contents,
-                                         document_path,
-                                         debug=edit_contents,
-                                         no_return=no_return,
-                                        )
-
-    if no_return:
-        return ''
-    else:
-        return new_contents
-
-
-def evaluate_function(element, contents, document_path,
-                      debug=False, no_return=False):
-    """Take a given Sakura ##func## element, and return the contents
-    of said evaluation.
-
-    I need to explain the rules of evaluation better herein.
-
-    Args:
-      element (dict): the dictionary generated from iter_tags().
-      document (str): the document to edit with the element evaluation
-
-    Returns:
-        str: the document after evaluating/substituting a function tag.
-
-    """
-
-    user_defined_args = get_args(element['contents'])
-    public = {  # room for elaboration on this...
-              'document_path': document_path,
-              'document': contents,
-              'element_full': element['full'],
-              'element_name': element['name'],
-             }
-
-    try:
-        func_name = element['name']
-        function, args, replace_all = func.load_functions(public)[func_name]
-
-    except KeyError:
-        error_vars = (document_path, element['name'], element['full'])
-        raise Exception('##func##    %s: %s is not loaded (%s)' % error_vars)
-
-    # if we do have user defined arguments in the element,
-    # then append them to the args!
-    if user_defined_args:
-        args.extend(user_defined_args)
-
-    data = function(*args)
-
-    if debug:
-        return data
-
-    if no_return:
-        return ''
-
-    if replace_all:
-        return data.replace(element['full'], '')
-    else:
-        return contents.replace(element['full'], data)
 
 
 def parse(document_path):
@@ -274,53 +134,21 @@ def parse(document_path):
       document_path (str): path of file being parsed
 
     Returns:
-      str: parsed/evaluated/substituted version of the contents
-        belonging to the file specified in document_path.
-    
+      str: document dictionary: path, contents.
+
     """
 
-    # the primary document content
-    document = {'path': document_path}
+    document = {}
+    document['contents'], path = from_dir('content', document_path, path=True)
+    document['path'] = path
 
-    with open(document['path']) as f:
-        document['contents'] = f.read().strip()
+    if document['contents'] is None:
+        raise Exception(document)
 
     document['contents'] = include(document)
-
-    # replace ((functions)) -- importantly last
-    document = replace_functions(document)
-    settings = lib.ini('settings')
-
-    if settings['parser']['minify'] == 'yes':
-        document = minify(document_path, document)
+    document = function.replace(document)
 
     return document
-
-
-def get_args(contents):
-    """Return a list of arguments therein the contents of a Sakura element.
-
-    If there are no arguments, returns None.
-
-    Args:
-      contents (str) -- example: "func config httpd basehref"
-
-    Returns:
-      str OR None: returns a list of arguments belonging to
-        a tag, or returns None if no such arguments exist.
-
-    Notes:
-      Should also be handling complex kwargs, as well as args.
-
-    """
-
-    if ' ' in contents:
-        # first arg is always the type of tag, e.g., func, inc
-        __, args = contents.split(' ', 1)
-        return args.split(' ')
-
-    else:
-        return None
 
 
 def parse_cache(document_path):
@@ -337,23 +165,12 @@ def parse_cache(document_path):
       dict|None: the document (from document_path): contents...
         Returns None if there is no _cache file.
 
-    Notes:
-      Has a hardcoded value (function_list), bad!
-
     """
 
-    function_list = 'cache/_cache'  # will go away soon! (os.path..)
 
-    # so this isn't fully implemented yet. x.x
-    settings = lib.ini('settings')
-    cache_dir = settings['directories']['cache']
+    function_list = from_dir('cache', '_cache')
 
-    try:
-
-        with open(function_list) as f:
-            function_list = f.read()
-
-    except IOError:
+    if function_list is None:
         return None
 
     with open(document_path) as f:
@@ -364,10 +181,10 @@ def parse_cache(document_path):
                 'edit_contents': edit_contents,
                 'path': document_path
                }
-    return replace_functions(document)
+    return function.replace(document)
 
 
-def generate():
+def cache_generate():
     """Generate files based on functions therein _generate.
 
     This is the last thing to run while caching.
@@ -376,26 +193,16 @@ def generate():
     document-specific data.
 
     Returns:
-        None
+        str: document contents
 
     Notes:
-      Bad hard-coded value (function_list)
       Shares A LOT with parse_cache...
 
     """
 
-    function_list = 'cache/_generate'  # will go away soon! (os.path..)
+    function_list = from_dir('cache', '_generate')
 
-    # so this isn't fully implemented yet. x.x
-    settings = lib.ini('settings')
-    cache_dir = settings['directories']['cache']
-
-    try:
-
-        with open(function_list) as f:
-            function_list = f.read()
-
-    except IOError:
+    if function_list is None:
         return None
 
     document = {
@@ -403,5 +210,5 @@ def generate():
                 'no_return': True,
                 'path': function_list
                }
-    return replace_functions(document)
+    return function.replace(document)
 
