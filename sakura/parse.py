@@ -14,46 +14,6 @@ import function
 import tag
 
 
-def from_dir(directory, file_path, path=False):
-    """Return the contents of a file therein the config-specified
-    directory.
-
-    Args:
-      file_path (str): the filepath/filename, relative to
-        the cache directory.
-
-      path (str): if True return the new path as well
-
-    Returns:
-      str|tuple: contents of file, or a tuple containing both the
-        contents and the new file path
-
-    """
-
-    settings = lib.ini('settings')
-    cache_dir = settings['directories'][directory]
-    file_path = os.path.join(cache_dir, file_path)
-
-    try:
-
-        with open(file_path) as f:
-
-            contents = f.read()
-
-            if path:
-                return (contents, file_path)
-            else:
-                return contents
-
-    except IOError:
-        raise Exception(file_path)
-
-        if path:
-            return (None, None)
-        else:
-            return None
-
-
 class IncludeError(Exception):
     def __init__(self, path, current_document_path):
         message = (
@@ -80,17 +40,13 @@ def include(document):
 
     """
 
-    contents = document['contents']
-
-    # while includes still exist, call them!
-    # this solves the problem of having an include in an include.
     settings = lib.ini('settings')
     include_directory = settings['directories']['include']
 
-    while tag.exists('include', contents):
+    # Possibility to parse inclusions within inclusions.
+    while document.has('include'):
 
-        # full element, element contents, and element name!
-        for element in tag.iter_tags('include', contents):
+        for element in document.tags('include'):
             include_tag = element['name']
             path = os.path.join(include_directory, include_tag)
 
@@ -101,14 +57,12 @@ def include(document):
                     include = f.read().strip()
 
             except IOError:
-                raise IncludeError(path, document['path'])
+                raise IncludeError(path, document.path)
 
             # Includes are able to reference the attributes from the
             # respective include-octothorpe.
             # ##var title## will return "wag" from ##inc title='wag'##
-            attributes = tag.get_attributes(element['full'])
-
-            for attribute_name, attribute_value in attributes.items():
+            for attribute_name, attribute_value in element['attribs'].items():
                 octothorpe_variable = (
                                        tag.TAG_VARIABLE_LEFT
                                        + attribute_name
@@ -116,9 +70,9 @@ def include(document):
                                       )
                 include = include.replace(octothorpe_variable, attribute_value)
 
-            contents = contents.replace(element['full'], include)
+            document.replace(element['full'], include)
 
-    return contents
+    return document.source
 
 
 def parse(document_path):
@@ -138,17 +92,17 @@ def parse(document_path):
 
     """
 
-    document = {}
-    document['contents'], path = from_dir('content', document_path, path=True)
-    document['path'] = path
+    # temporary, will lookup in settings in the future
+    document_path = os.path.join('content', document_path)
+    document = tag.TagDoc(path=document_path)
 
-    if document['contents'] is None:
-        raise Exception(document)
+    if not document:
+        raise Exception(document.source)
 
-    document['contents'] = include(document)
-    document = function.replace(document)
+    include(document)
+    function.replace(document)
 
-    return document
+    return document.source
 
 
 def parse_cache(document_path):
@@ -168,7 +122,9 @@ def parse_cache(document_path):
     """
 
 
-    function_list = from_dir('cache', '_cache')
+    path = os.path.join('cache', '_cache')
+    function_list = tag.TagDoc(path=path)
+    function_list.path = document_path
 
     if function_list is None:
         return None
@@ -176,12 +132,7 @@ def parse_cache(document_path):
     with open(document_path) as f:
         edit_contents = f.read()
 
-    document = {
-                'contents': function_list,
-                'edit_contents': edit_contents,
-                'path': document_path
-               }
-    return function.replace(document)
+    return function.replace(function_list, edit_this=edit_contents)
 
 
 def cache_generate():
@@ -200,15 +151,11 @@ def cache_generate():
 
     """
 
-    function_list = from_dir('cache', '_generate')
+    path = os.path.join('cache', '_generate')
+    function_list = tag.TagDoc(path=path)
 
     if function_list is None:
         return None
 
-    document = {
-                'contents': function_list,
-                'no_return': True,
-                'path': function_list
-               }
-    return function.replace(document)
+    return function.replace(function_list, no_return=True)
 

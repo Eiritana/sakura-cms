@@ -14,6 +14,48 @@ TAG_VARIABLE_LEFT = '##var '
 TAG_VARIABLE_RIGHT = '##'
 
 
+class TagDoc(object):
+    """asdfasdf"""
+
+    def __init__(self, source=None, path=None):
+        self.source = source
+        self.path = path
+
+        if path and source is None:
+
+            with open(path) as f:
+                self.source = f.read()
+
+    def __contains__(self, key):
+        return exists(key, self.source)
+
+    def has(self, key):
+        return exists(key, self.source)
+
+    def __nonzero__(self):
+        return bool(self.source)
+
+    def __iter__(self):
+        return iter_tags('any', self.source, attributes=True)
+
+    def tags(self, tag_type='all'):
+        return iter_tags(tag_type, self.source, attributes=True)
+
+    def iter_attrib(self, attribute_name, tag_type='all'):
+        return iter_attribute(self.source, tag_type, attribute_name)
+
+    def find(self, attribute_name, attribute_value, tag_type='all'):
+        return from_attribute(
+                              self.source,
+                              tag_type,
+                              attribute_name,
+                              attribute_value
+                             )
+
+    def replace(self, find_this, replace_with):
+        self.source = self.source.replace(find_this, replace_with)
+
+
 def pattern(tag):
     """Returns the regular expression for the specified tag.
 
@@ -79,6 +121,7 @@ def iter_tags(tag, document, attributes=False):
 
 
 def iter_attribute(document, tag_type, attribute_name):
+    """asdfsadf"""
 
     for tag in iter_tags(tag_type, document):
         tag_attributes = get_attributes(tag['contents'])

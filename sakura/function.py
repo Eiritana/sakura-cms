@@ -54,7 +54,7 @@ def load(public):
     return functions
 
 
-def replace(document):
+def replace(document, edit_this=None, no_return=False):
     """Replace Sakura functions ##func function-name args##
 
     Used for parsing the function list _cache, which specified functions to
@@ -77,26 +77,24 @@ def replace(document):
 
     """
 
-    contents = document['contents']
-    document_path = document['path']
-    edit_contents = document.get('edit_contents', None)
-    new_contents = edit_contents or contents
-    no_return = 'no_return' in document and document['no_return']
+    document_path = document.path
+    new_contents = edit_this or document.source
 
     # replace ((functions)) -- importantly last
-    for element in tag.iter_tags('function', contents):
+    for element in tag.iter_tags('function', document.source):
         new_contents = evaluate(
                                 element,
                                 new_contents,
                                 document_path,
-                                debug=edit_contents,
+                                debug=edit_this,
                                 no_return=no_return,
                                )
 
     if no_return:
-        return ''
-    else:
-        return new_contents
+        return None
+
+    document.source = new_contents
+    return new_contents
 
 
 def evaluate(element, contents, document_path,

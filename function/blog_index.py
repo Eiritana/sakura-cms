@@ -10,6 +10,7 @@ import re
 from page_meta import page_meta
 from sakura.common import ini
 from sakura import tag
+from bs4 import BeautifulSoup
 
 
 SAKURA_ARGS = ['document_path']
@@ -36,6 +37,10 @@ def blog_index(document_path):
     header_open = settings['header']['open']
     header_close = settings['header']['close']
 
+    # summary
+    summary_open = settings['summary']['open']
+    summary_close = settings['summary']['close']
+
     for directory, files in index_d.items():
         paths = [directory + '/' + fname for fname in files]
 
@@ -44,16 +49,19 @@ def blog_index(document_path):
 
         for path in paths:
 
+            if path.endswith('index.html'):
+                continue
+
             with open(path) as f:
                 article = f.read()
 
             # get the article title, permalink
             # get title from octothorpe ##code##
-            for __, attributes in tag.iter_attribute(
-                                                     article,
-                                                     'include',
-                                                     'title'
-                                                     ):
+            for element, attributes in tag.iter_attribute(
+                                                          article,
+                                                          'include',
+                                                          'title'
+                                                         ):
 
                 title = attributes['title']
                 break
@@ -69,8 +77,18 @@ def blog_index(document_path):
 
             # get the first paragraph after the article title
             # I'll have to grab the first paragraph from the article path
-            #paragraph = str(title_element.findNextSibling('p'))
-            #contents.write(paragraph)
+            for paragraph in BeautifulSoup(article).find_all('p'):
+                paragraph = paragraph.string
+
+                if element['full'] in paragraph:
+                    continue
+
+            paragraph = (
+                         summary_open
+                         + paragraph
+                         + summary_close
+                        )
+            contents.write(paragraph)
             contents.write(container_close)
 
     return contents.getvalue()

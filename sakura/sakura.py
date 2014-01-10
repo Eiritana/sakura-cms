@@ -138,6 +138,8 @@ def backup():
     """Zip the config and content directories into a backup/date
     folder.
 
+    Totally a snapshot thing...
+
     """
 
     settings = lib.ini('settings')
