@@ -57,15 +57,10 @@ def blog_index(document_path):
 
             # get the article title, permalink
             # get title from octothorpe ##code##
-            for element, attributes in tag.iter_attribute(
-                                                          article,
-                                                          'include',
-                                                          'title'
-                                                         ):
+            element = tag.TagDoc(article).first('include', 'title')
+            title = element['title']
 
-                title = attributes['title']
-                break
-
+            # assemble the obtained data
             contents.write(container_open)
             contents.write(header_open)
             link = path.split('/', 1)[-1]
@@ -80,7 +75,7 @@ def blog_index(document_path):
             for paragraph in BeautifulSoup(article).find_all('p'):
                 paragraph = paragraph.string
 
-                if element['full'] in paragraph:
+                if element.full in paragraph:
                     continue
 
             paragraph = (

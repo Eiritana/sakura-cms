@@ -43,34 +43,34 @@ def include(document):
     settings = lib.ini('settings')
     include_directory = settings['directories']['include']
 
+    # this is so messy I want to vomit out of my eye sockets
     # Possibility to parse inclusions within inclusions.
-    while document.has('include'):
+    # the iterator should be in a while loop itself!
+    for element in document.iter_while('include'):
+        include_tag = element.action
+        path = os.path.join(include_directory, include_tag)
 
-        for element in document.tags('include'):
-            include_tag = element['name']
-            path = os.path.join(include_directory, include_tag)
+        # retrieve file specified in ##inc## call
+        try:
 
-            # retrieve file specified in ##inc## call
-            try:
+            with open(path) as f:
+                include = f.read().strip()
 
-                with open(path) as f:
-                    include = f.read().strip()
+        except IOError:
+            raise IncludeError(path, document.path)
 
-            except IOError:
-                raise IncludeError(path, document.path)
+        # Includes are able to reference the attributes from the
+        # respective include-octothorpe.
+        # ##var title## will return "wag" from ##inc title='wag'##
+        for attribute_name, attribute_value in element.items():
+            octothorpe_variable = (
+                                   tag.TAG_VARIABLE_LEFT
+                                   + attribute_name
+                                   + tag.TAG_VARIABLE_RIGHT
+                                  )
+            include = include.replace(octothorpe_variable, attribute_value)
 
-            # Includes are able to reference the attributes from the
-            # respective include-octothorpe.
-            # ##var title## will return "wag" from ##inc title='wag'##
-            for attribute_name, attribute_value in element['attribs'].items():
-                octothorpe_variable = (
-                                       tag.TAG_VARIABLE_LEFT
-                                       + attribute_name
-                                       + tag.TAG_VARIABLE_RIGHT
-                                      )
-                include = include.replace(octothorpe_variable, attribute_value)
-
-            document.replace(element['full'], include)
+        document.replace(element.full, include)
 
     return document.source
 

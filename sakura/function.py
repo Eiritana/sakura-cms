@@ -81,7 +81,7 @@ def replace(document, edit_this=None, no_return=False):
     new_contents = edit_this or document.source
 
     # replace ((functions)) -- importantly last
-    for element in tag.iter_tags('function', document.source):
+    for element in document('function'):
         new_contents = evaluate(
                                 element,
                                 new_contents,
@@ -113,20 +113,20 @@ def evaluate(element, contents, document_path,
 
     """
 
-    user_defined_args = get_args(element['contents'])
+    user_defined_args = element.args
     public = {  # room for elaboration on this...
               'document_path': document_path,
               'document': contents,
-              'element_full': element['full'],
-              'element_name': element['name'],
+              'element_full': element.full,
+              'element_name': element.action,
              }
 
     try:
-        func_name = element['name']
+        func_name = element.action
         function, args, replace_all = load(public)[func_name]
 
     except KeyError:
-        error_vars = (document_path, element['name'], element['full'])
+        error_vars = (document_path, element.action, element.full)
         raise Exception('##func##    %s: %s is not loaded (%s)' % error_vars)
 
     # if we do have user defined arguments in the element,
@@ -143,33 +143,7 @@ def evaluate(element, contents, document_path,
         return ''
 
     if replace_all:
-        return data.replace(element['full'], '')
+        return data.replace(element.full, '')
     else:
-        return contents.replace(element['full'], data)
-
-
-def get_args(contents):
-    """Return a list of arguments therein the contents of a Sakura element.
-
-    If there are no arguments, returns None.
-
-    Args:
-      contents (str) -- example: "func config httpd basehref"
-
-    Returns:
-      str OR None: returns a list of arguments belonging to
-        a tag, or returns None if no such arguments exist.
-
-    Notes:
-      Should also be handling complex kwargs, as well as args.
-
-    """
-
-    if ' ' in contents:
-        # first arg is always the type of tag, e.g., func, inc
-        __, args = contents.split(' ', 1)
-        return args.split(' ')
-
-    else:
-        return None
+        return contents.replace(element.full, data)
 
