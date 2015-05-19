@@ -10,6 +10,8 @@ This software was more so created as an experiment, to flex my brain and learn s
 
 Sakura is a static site generator. A lot of Sakura CMS is centered around these things called _snapshots_.
 
+Although, Sakura can be used for things like literature, books, other languages beside HTML. Sakura is namely a parser which looks for ++##tags like="this"##++ and replaces it based on rules (include, function, or variable).
+
 = What is Sakura CMS developed for/on?
 
 I test, devleop Sakura CMS on my FreeBSD 10.1-RELEASE-p10 workstation:
