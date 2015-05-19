@@ -24,6 +24,8 @@ You should be able to +pip install -r requirements.txt+.
 
 = How do I use Sakura CMS?
 
+I included a demo snapshot/website for you called +example.zip+.
+
 Firstly, use sa-cli.py to setup the directories you'll need:
 
 ----
