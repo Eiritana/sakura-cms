@@ -1,5 +1,0 @@
-<dl>
- <dt><a href="mailto:##var email##">##var name##</a></dt>
- <dd class="profile-pic"><img src="##var image##"></dd>
- <dd>##var description##</dd>
-</dl>

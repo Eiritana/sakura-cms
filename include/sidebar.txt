@@ -1,5 +1,0 @@
-<section id="page-sidebar">
-  ##func breadcrumbs##
-  ##func table_of_contents##
-  ##func page_meta##
-</section>
