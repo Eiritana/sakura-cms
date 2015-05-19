@@ -24,6 +24,8 @@ You should be able to +pip install -r requirements.txt+.
 
 = How do I use Sakura CMS?
 
+I included a demo snapshot/website for you called +example.zip+.
+
 Firstly, use sa-cli.py to setup the directories you'll need:
 
 ----
@@ -84,7 +86,10 @@ You can use functions to introduce new parsing features.
 You can call a function like so:
 
 ----
+##func function_name any optional arguments##
 ----
+
+Functions refer to plugin-style modules which contain a single function in the +functions/+ directory. Please refer to those modules for the documentation and usage of any functions.
 
 == _cache
 
