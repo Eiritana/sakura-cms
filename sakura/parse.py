@@ -97,7 +97,7 @@ def parse(document_path):
     document = tag.TagDoc(path=document_path)
 
     if not document:
-        raise Exception(document.source)
+        raise Exception((document_path, document.source))
 
     include(document)
     function.replace(document)
@@ -152,7 +152,11 @@ def cache_generate():
     """
 
     path = os.path.join('cache', '_generate')
-    function_list = tag.TagDoc(path=path)
+
+    try:
+        function_list = tag.TagDoc(path=path)
+    except IOError:
+        return None
 
     if function_list is None:
         return None

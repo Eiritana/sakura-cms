@@ -1,0 +1,144 @@
+= Warning/Preface
+
+*Warning:* this is a repository I haven't _seriously_ touched since January 13, 2014. I recently updated it with better documentation, some fixes, just because some friends of mine were interested in it, and heck, it looks good on a resume.
+
+That's not to say I'm not interested in hearing what you have to say! Please, drop me an e-mail if you have any comments! My email is lillian.lynn.lemmer@gmail.com. Though, I don't plan on adding any new features or continuing the development of Sakura CMS in any serious manner.
+
+This software was more so created as an experiment, to flex my brain and learn some things.
+
+= Okay, so what is Sakura CMS?
+
+Sakura is a static site generator. A lot of Sakura CMS is centered around these things called _snapshots_.
+
+= What is Sakura CMS developed for/on?
+
+I test, devleop Sakura CMS on my FreeBSD 10.1-RELEASE-p10 workstation:
+
+  * Python 2.7.9
+  * py27-lxml-3.4.1_1 (FreeBSD package)
+  * py27-beautifulsoup-4.3.2 (FreeBSD package)
+
+You should be able to +pip install -r requirements.txt+.
+
+= How do I use Sakura CMS?
+
+Firstly, use sa-cli.py to setup the directories you'll need:
+
+----
+$ python sa-cli.py --setup
+----
+
+Extract a snapshot:
+
+----
+$ python sa-cli.py --install example.zip
+----
+
+Then cache/parse the site:
+
+----
+$ python sa-cli.py --refresh
+----
+
+= Making a static site
+
+A Sakura site is primarily broken down into +includes+, +functions+, and +content+. 
+
+The +content+ directory is where you do the bulk of your actual website content editing. You can call functions and inclusions from text files in this directory.
+
+The +includes+ directory is for highly reusable, non-page-specific HTML or text. For example, you may have a header and footer you want on every page.
+
+
+== Includes
+
+The include tag allows you to include any text files from +includes/+. For example, one may call +include/head.txt+ like this in an HTML file therein +content/+:
+
+----
+##inc head.txt title="This the page title."##
+----
+
+=== Variables
+
+The contents of the +includes/head.txt+ in question may look like:
+
+----
+<!DOCTYPE html>
+<html>
+<head>
+  <title>##var title##</title>
+</head>
+<body>
+<h1>##var title##</h1>
+----
+
+The previous +This is the page title.+ will replace +##var title##+.
+
+== Functions
+
+The +functions/+ directory is glob'd for modules that adhere to the Sakura function standard.
+
+You can use functions to introduce new parsing features.
+
+You can call a function like so:
+
+----
+----
+
+== _cache
+
+This file (+content/_cache+) contains functions to be automatically executed on every single page.
+
+= Snapshots?
+
+You can create a zip archive which others (including yourself) can extract with their Sakura CMS install/_sa-cli.py_.
+
+----
+./sa-cli.py --snapshot example.zip content include
+----
+
+= Config
+
+The +config/+ directory is important! It holds configurations for +functions+, and the general settings configuration file (+settings.ini+). Here's the default +settings.ini+:
+
+----
+[directories]
+cache=cache
+content=content
+include=include
+backup=backup
+cgi=cgi
+function=function
+database=database
+basehref=/cache/
+
+
+[httpd]
+address=127.0.0.1
+port=8080
+basehref=http://127.0.0.1/cache/
+browser=yes
+
+
+[backups]
+before_cache=no
+cgi=yes
+content=yes
+parsers=yes
+cache=yes
+config=yes
+pieces=yes
+
+
+[parser]
+minify=no
+----
+
+= Notes
+
+  * You can use +chmod +x sa-cli.py+ so you don't need to prefix your commands with "python," e.g., +./sa-cli.py --refresh+.
+
+= Requirements
+
+  * lxml for blog_index function
+  * BeautifulSoup
+

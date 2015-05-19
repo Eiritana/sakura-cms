@@ -1,9 +1,11 @@
-</article>
-</div>
+    </article>
+    <footer>##inc sidebar.txt##</footer>
+  </section>
 
-<footer class="center-width" id="footer">
- <p>Footer links</p>
-</footer>
+  <footer>
+    <p>Footer links</p>
+  </footer>
+</div>
 
 </body>
 </html>

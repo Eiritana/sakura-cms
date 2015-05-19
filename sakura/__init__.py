@@ -1,5 +1,5 @@
 import common
 import parse
-import func
+import function
 import sakura
 import snapshot

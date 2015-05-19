@@ -2,9 +2,9 @@
 *.db
 *.swp
 content/
+backup/
 cache/
 include/
-*.zip
 *.core
 *.swn
 *swo

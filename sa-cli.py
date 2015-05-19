@@ -1,136 +1,82 @@
 #!/usr/local/bin/python
-"""Sakura CLI interface"""
 
+# modconf.py
+# Lillian Lemmer <lillian.lynn.lemmer@gmail.com>
+#
+# This module is part of Sakura CMS and is released under the
+# MIT license: http://opensource.org/licenses/MIT
+
+"""sa-cli.py: Sakura CMS CLI interface
+
+Usage:
+  sa-cli.py --refresh
+  sa-cli.py --setup
+  sa-cli.py --httpd
+  sa-cli.py --list
+  sa-cli.py --backup
+  sa-cli.py --install <snapshot_path>
+  sa-cli.py --update <snapshot_path>
+  sa-cli.py --info <snapshot_name>
+  sa-cli.py --check <snapshot_path>
+  sa-cli.py --delete <snapshot_name>
+  sa-cli.py --snapshot <dest_path> <source_path> <source_path>...
+
+"""
 
 import sakura
-import argparse
+import docopt
+
+__VERSION__ = "0.9"
 
 
-description = (
-               'Sakura content management system; parses files, then "caches" '
-               'them.'
-              )
-function = argparse.ArgumentParser(description=description, prog='sa-cli')
+arguments = docopt.docopt(__doc__, version='sa-cli ' + __VERSION__)
 
-refresh_help = 'Clear CACHE and reparse CONTENT into CACHE.'
-function.add_argument(
-                    '--refresh',
-                    help=refresh_help,
-                    dest='refresh',
-                    action='store_true'
-                   )
-
-setup_help = 'Setup Sakura directories.'
-function.add_argument(
-                    '--setup',
-                    help=setup_help,
-                    dest='setup',
-                    action='store_true'
-                   )
-
-# built-in HTTP, CGI server
-httpd_help = 'Start HTTPD server.'
-function.add_argument(
-                    '--httpd',
-                    help=httpd_help,
-                    dest='httpd',
-                    action='store_true'
-                   )
+# setup requried sakura directories
+# should be ran after a fresh install
+if arguments['--setup']:
+    sakura.sakura.setup()
 
 # snapshot install
-install_help = 'Install a snapshot (.zip)'
-function.add_argument(
-                      '--install',
-                      help=install_help,
-                     )
-
-# snapshot info
-info_help = 'Display files belonging to a snapshot.'
-function.add_argument(
-                    '--info',
-                    help=info_help
-                   )
+# take the contents of a zip archive, extract it according to rules
+if arguments['--install']:
+    sakura.snapshot.install(arguments['<snapshot_path>'])
 
 # snapshot update
-update_help = 'Update a snapshot by name.'
-function.add_argument(
-                    '--update',
-                    help=update_help
-                   )
+# like install, but asks to overwrite... wait this isn't clear..
+if arguments['--update']:
+    sakura.snapshot.install(arguments['<snapshot_name>'], update=True)
 
-# snap snapshot
-snapshot_help = 'Add a series of paths to a snapshot, recursively.'
-function.add_argument(
-                    '--snapshot',
-                    nargs='+',
-                    help=snapshot_help
-                   )
-
-# snapshot check
-check_help = 'Check a snapshot before you install it!'
-function.add_argument(
-                    '--check',
-                    help=check_help
-                   )
+# snapshot info
+# display information about an installed snapshot
+if arguments['--info']:
+    sakura.snapshot.info(arguments['<snapshot_name>'])
 
 # snapshot remove
-delete_help = 'Delete a snapshot (by name)'
-function.add_argument(
-                    '--delete',
-                    help=delete_help,
-                   )
+if arguments['--delete']:
+    sakura.snapshot.delete(arguments['<snapshot_name>'])
 
-# snapshot list
-list_help = 'List installed snapshot'
-function.add_argument(
-                    '--list',
-                    help=list_help,
-                    dest='list',
-                    action='store_true'
-                   )
+# create snapshot
+if arguments['--snapshot']:
+    sakura.snapshot.snapshot(arguments['<dest_path>'], *arguments['<source_path>'])
 
-# backup
-backup_help = 'Backup defined Sakura directories.'
-function.add_argument(
-                    '--backup',
-                    help=backup_help,
-                    dest='backup',
-                    action='store_true'
-                   )
+# snapshot check
+# maybe call validate
+if arguments['--check']:
+    sakura.snapshot.check(arguments['<snapshot_path>'])
 
-# add --restore
-args = function.parse_args()
-
-if args.setup:
-    setup()
-
-if args.install:
-    sakura.snapshot.install(args.install)
-
-if args.update:
-    sakura.snapshot.install(args.update, update=True)
-
-if args.info:
-    sakura.snapshot.info(args.info)
-
-if args.delete:
-    sakura.snapshot.delete(args.delete)
-
-if args.snapshot:
-    sakura.snapshot.snapshot(*args.snapshot)
-
-if args.check:
-    sakura.snapshot.check(args.check)
-
-if args.refresh:
+# rebuild cache
+if arguments['--refresh']:
     sakura.sakura.cache()
 
-if args.list:
+# snapshot list
+if arguments['--list']:
     sakura.snapshot.display_installed()
 
-if args.httpd:
+# built-in HTTP, CGI server
+if arguments['--httpd']:
     sakura.sakura.httpd()
 
-if args.backup:
+# backup
+if arguments['--backup']:
     sakura.sakura.backup()
 
