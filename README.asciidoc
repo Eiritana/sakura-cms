@@ -50,6 +50,8 @@ You can then test the static site (the files in +cache/+ which, for example, you
 $ python sa-cli.py --httpd
 ----
 
+Then by default, you should be able to access http://127.0.0.1:8080/ in a web browser and see your generated static site residing in +cache/+.
+
 = Making a static site
 
 A Sakura site is primarily broken down into +includes+, +functions+, and +content+. 
