@@ -44,6 +44,12 @@ Then cache/parse the site:
 $ python sa-cli.py --refresh
 ----
 
+You can then test the static site (the files in +cache/+ which, for example, you'd copy to a web server/public directory) with the builtin test web server:
+
+----
+$ python sa-cli.py --httpd
+----
+
 = Making a static site
 
 A Sakura site is primarily broken down into +includes+, +functions+, and +content+. 
@@ -51,7 +57,6 @@ A Sakura site is primarily broken down into +includes+, +functions+, and +conten
 The +content+ directory is where you do the bulk of your actual website content editing. You can call functions and inclusions from text files in this directory.
 
 The +includes+ directory is for highly reusable, non-page-specific HTML or text. For example, you may have a header and footer you want on every page.
-
 
 == Includes
 
