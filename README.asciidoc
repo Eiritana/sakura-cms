@@ -103,6 +103,24 @@ You can create a zip archive which others (including yourself) can extract with 
 ./sa-cli.py --snapshot example.zip content include
 ----
 
+Sakura CMS comes with a system which is like a package manager for snapshots. You can list installed snapshots with:
+
+----
+./sa-cli.py --list
+----
+
+You can delete an installed snapshot with:
+
+----
+./sa-cli.py --delete example
+----
+
+If you want to avoid overwriting files when you install a snapshot (should prompt to overwrite):
+
+----
+./sa-cli.py --upgrade example.zip
+----
+
 = Config
 
 The +config/+ directory is important! It holds configurations for +functions+, and the general settings configuration file (+settings.ini+). Here's the default +settings.ini+:
