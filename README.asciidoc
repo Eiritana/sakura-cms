@@ -104,6 +104,8 @@ This file (+content/_cache+) contains functions to be automatically executed on 
 
 = Snapshots?
 
+Sakura CMS comes with an example snapshot called +example.zip+, it'd be wise to unzip it and look at all the files to get an idea of how Sakura CMS works in general.
+
 You can create a zip archive which others (including yourself) can extract with their Sakura CMS install/_sa-cli.py_.
 
 ----
